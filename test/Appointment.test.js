@@ -11,7 +11,7 @@ describe('Appointment', () => {
   });
 
   const render = komponen => ReactDOM.render(komponen, container);
-  
+
   it('nge-render nama depannya customer', () => {
     // "Arrange", untuk testing komponen.
     // Di React, berarti juga termasuk mempersiapkan component dan container-nya, dimana komponen akan di-mount
@@ -40,8 +40,14 @@ describe('AppointmentsDayView', () => {
 
   const hariIni = new Date();
   const appointments = [
-    { mulaiPada: hariIni.setHours(12, 0) },
-    { mulaiPada: hariIni.setHours(13, 0) }
+    {
+      mulaiPada: hariIni.setHours(12, 0),
+      customer: { namaDepan: 'Mary' }
+    },
+    {
+      mulaiPada: hariIni.setHours(13, 0),
+      customer: { namaDepan: 'Belu' }
+    }
   ];
 
   beforeEach(() => {
@@ -72,5 +78,17 @@ describe('AppointmentsDayView', () => {
     expect(container.querySelectorAll('li')).toHaveLength(2);
     expect(container.querySelectorAll('li')[0].textContent).toEqual('12:00');
     expect(container.querySelectorAll('li')[1].textContent).toEqual('13:00');
+  });
+
+  it('di awal menampilkan pesan tidak ada appointment hari ini', () => {
+    render(<AppointmentsDayView appointments={[]} />);
+
+    expect(container.textContent).toMatch('Tidak ada appointment untuk hari ini.');
+  });
+
+  it('milih appointment pertama secara defaultnya', () => {
+    render(<AppointmentsDayView appointments={appointments} />);
+
+    expect(container.textContent).toMatch('Mary');
   });
 });
