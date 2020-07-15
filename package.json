@@ -1,0 +1,22 @@
+{
+  "name": "appointments",
+  "version": "1.0.0",
+  "description": "Appointments system",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/github.com/sakitkepala.git"
+  },
+  "author": "Andika",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/github.com/sakitkepala/issues"
+  },
+  "homepage": "https://github.com/github.com/sakitkepala#readme",
+  "devDependencies": {
+    "jest": "^26.1.0"
+  }
+}
