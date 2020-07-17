@@ -5,8 +5,35 @@ const waktuAppointmentHariItu = mulaiPada => {
   return `${jam}:${menit}`;
 };
 
-export const Appointment = ({ customer: { namaDepan } }) => (
-  <div>{namaDepan}</div>
+export const Appointment = ({ mulaiPada, customer, stylist, layanan, catatan }) => (
+  <div id="appointmentView">
+    <h3>Appointment hari ini untuk jam {waktuAppointmentHariItu(mulaiPada)}</h3>
+
+    <table>
+      <tbody>
+        <tr>
+          <td>Customer</td>
+          <td>{customer.namaDepan} {customer.namaBelakang}</td>
+        </tr>
+        <tr>
+          <td>Nomor Telepon</td>
+          <td>{customer.nomorTelepon}</td>
+        </tr>
+        <tr>
+          <td>Stylist</td>
+          <td>{stylist}</td>
+        </tr>
+        <tr>
+          <td>Layanan</td>
+          <td>{layanan}</td>
+        </tr>
+        <tr>
+          <td>Catatan</td>
+          <td>{catatan}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 );
 
 export const AppointmentsDayView = ({ appointments }) => {
