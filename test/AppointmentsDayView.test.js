@@ -240,4 +240,20 @@ describe('AppointmentsDayView', () => {
 
     expect(container.textContent).toMatch('Belu');
   });
+
+  it('kasih class .toggle di button untuk appoinment yang dipilih', () => {
+    render(<AppointmentsDayView appointments={appointments} />);
+    const button = container.querySelectorAll('button')[1];
+
+    ReactTestUtils.Simulate.click(button);
+    
+    expect(button.className).toMatch('toggled');
+  });
+
+  it('jangan kasih class .toggle appoinment lain yang gak dipilih', () => {
+    render(<AppointmentsDayView appointments={appointments} />);
+    const button = container.querySelectorAll('button')[1];
+    
+    expect(button.className).not.toMatch('toggled');
+  });
 });
