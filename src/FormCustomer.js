@@ -1,16 +1,30 @@
 import React, { useState } from 'react';
 
 
-const FormCustomer = ({ namaDepan, onSubmit }) => {
+const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
   // Sintaks assignment ini `{ namaDepan }` ternyata
   // untuk bikin Objek yang punya properti `namaDepan`
   // dengan nilai key dari props di atas.
-  const [ customer, setCustomer ] = useState({ namaDepan });
+  const [ customer, setCustomer ] = useState({ namaDepan, namaBelakang, nomorTelepon });
 
   const handleChangeNamaDepan = ({ target }) => {
     setCustomer((customer) => ({
       ...customer,
       namaDepan: target.value
+    }))
+  };
+
+  const handleChangeNamaBelakang = ({ target }) => {
+    setCustomer(customer => ({
+      ...customer,
+      namaBelakang: target.value
+    }))
+  };
+
+  const handleChangeNomorTelepon = ({ target }) => {
+    setCustomer(customer => ({
+      ...customer,
+      nomorTelepon: target.value
     }))
   };
 
@@ -39,6 +53,12 @@ const FormCustomer = ({ namaDepan, onSubmit }) => {
     <form id="customer" onSubmit={() => onSubmit(customer)}>
       <label htmlFor="namaDepan">Nama depan</label>
       <input id="namaDepan" type="text" name="namaDepan" value={namaDepan} onChange={handleChangeNamaDepan} />
+
+      <label htmlFor="namaBelakang">Nama belakang</label>
+      <input id="namaBelakang" type="text" name="namaBelakang" value={namaBelakang} onChange={handleChangeNamaBelakang} />
+
+      <label htmlFor="nomorTelepon">Nomor telepon</label>
+      <input id="nomorTelepon" type="text" name="nomorTelepon" value={nomorTelepon} onChange={handleChangeNomorTelepon} />
     </form>
   );
 };

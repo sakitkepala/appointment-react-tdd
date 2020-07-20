@@ -107,7 +107,37 @@ describe('FormCustomer', () => {
 
     itNgesubmitNilaiExisting('namaDepan', 'Mary');
 
-    itNgesubmitNilaiInputBaru('namaDepan', 'Mary');
+    itNgesubmitNilaiInputBaru('namaDepan', 'Belu');
+  });
+
+  describe('field nama belakang', () => {
+
+    itDirenderSebagaiBoxInputTeks('namaBelakang');
+
+    itMenyertakanNilaiYangExisting('namaBelakang');
+
+    itNgerenderLabel('namaBelakang', 'Nama belakang');
+
+    itAssignIdSesuaiIdLabel('namaBelakang');
+
+    itNgesubmitNilaiExisting('namaBelakang', 'Jane');
+
+    itNgesubmitNilaiInputBaru('namaBelakang', 'Kesayangan');
+  });
+
+  describe('field nomor telepon', () => {
+
+    itDirenderSebagaiBoxInputTeks('nomorTelepon');
+
+    itMenyertakanNilaiYangExisting('nomorTelepon');
+
+    itNgerenderLabel('nomorTelepon', 'Nomor telepon');
+
+    itAssignIdSesuaiIdLabel('nomorTelepon');
+
+    itNgesubmitNilaiExisting('nomorTelepon', '123456');
+
+    itNgesubmitNilaiInputBaru('nomorTelepon', '654321');
   });
 
 });
