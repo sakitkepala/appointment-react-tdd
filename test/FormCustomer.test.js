@@ -12,16 +12,7 @@ describe('FormCustomer', () => {
   });
 
   const form = id => container.querySelector(`form[id="${id}"]`);
-
-  const expectFieldInputTipenyaText = elemenForm => {
-    // expect(elemenForm).not.toBe(undefined);
-    expect(elemenForm).not.toBeNull();
-    expect(elemenForm.tagName).toEqual('INPUT');
-    expect(elemenForm.type).toEqual('text');
-  };
-
-  const fieldNamaDepan = () => form('customer').elements.namaDepan;
-
+  const field = name => form('customer').elements[name];
   const labelFor = elemenForm => container.querySelector(`label[for="${elemenForm}"]`);
 
   it('nge-render form', () => {
@@ -30,54 +21,93 @@ describe('FormCustomer', () => {
     expect(form('customer')).not.toBeNull();
   });
 
-  it('nge-render field nama depan sebagai box teks', () => {
-    render(<FormCustomer />);
+  const expectFieldInputTipenyaText = elemenForm => {
+    // expect(elemenForm).not.toBe(undefined);
+    expect(elemenForm).not.toBeNull();
+    expect(elemenForm.tagName).toEqual('INPUT');
+    expect(elemenForm.type).toEqual('text');
+  };
 
-    expectFieldInputTipenyaText(fieldNamaDepan());
-  });
+  const itDirenderSebagaiBoxInputTeks = (namaField) => {
+    it('di-render sebagai box input teks', () => {
+      render(<FormCustomer />);
 
-  it('menyertakan nilai yang existing untuk nama depan', () => {
-    render(<FormCustomer namaDepan="Belu" />);
+      expectFieldInputTipenyaText(field(namaField));
+    });
+  };
 
-    expect(fieldNamaDepan().value).toEqual('Belu');
-  });
+  const itMenyertakanNilaiYangExisting = (namaField) => {
+    it('menyertakan nilai yang existing', () => {
+      render(<FormCustomer {...{[namaField]: 'nilai' }} />);
 
-  it('nge-render label untuk field nama depan', () => {
-    render(<FormCustomer />);
+      expect(field(namaField).value).toEqual('nilai');
+    });
+  };
 
-    expect(labelFor('namaDepan').textContent).toEqual('Nama depan');
-  });
+  const itNgerenderLabel = (namaField, nilaiLabel) => {
+    it('nge-render label', () => {
+      render(<FormCustomer />);
+  
+      expect(labelFor(namaField).textContent).toEqual(nilaiLabel);
+    });
+  };
 
-  it('assign satu id yang sesuai id label-nya dengan field nama depan', () => {
-    render(<FormCustomer />);
+  const itAssignIdSesuaiIdLabel = (namaField) => {
+    it('nge-assign id yang sesuai id label-nya', () => {
+      render(<FormCustomer />);
+  
+      expect(field(namaField).id).toEqual(namaField);
+    });
+  };
 
-    expect(fieldNamaDepan().id).toEqual('namaDepan');
-  });
+  const itNgesubmitNilaiInputBaru = (namaField, nilaiInput) => {
+    it('simpan nilai yang diinput baru ketika disubmit', async () => {
+      expect.hasAssertions();
+      render(
+        <FormCustomer
+          {...{ [namaField]: 'nilaiExisting' }}
+          onSubmit={
+            customer => expect(customer[namaField]).toEqual(nilaiInput)
+          }
+        />
+      );
 
-  it('simpan nama depan yang existing ketika disubmit', async () => {
-    expect.hasAssertions();
-    render(
-      <FormCustomer
-        namaDepan="Belu"
-        onSubmit={
-          ({ namaDepan }) => expect(namaDepan).toEqual('Belu')
-        }
-      />);
-    await ReactTestUtils.Simulate.submit(form('customer'));
-  });
-
-  it('simpan nama depan yang baru ketika disubmit', async () => {
-    expect.hasAssertions();
-    render(
-      <FormCustomer
-        namaDepan="Belu"
-        onSubmit={
-          ({ namaDepan }) => expect(namaDepan).toEqual('Mary')
-        }
-      />);
-      await ReactTestUtils.Simulate.change(fieldNamaDepan(), {
-        target: { value: 'Mary' }
-      });
+      await ReactTestUtils.Simulate.change(
+        field(namaField),
+        { target: { value: nilaiInput } }
+      );
       await ReactTestUtils.Simulate.submit(form('customer'));
+    });
+  };
+
+  const itNgesubmitNilaiExisting = (namaField, nilaiExisting) => {
+    it('simpan nilai yang existing ketika disubmit', async () => {
+      expect.hasAssertions();
+      render(
+        <FormCustomer
+          {...{ [namaField]: nilaiExisting }}
+          onSubmit={
+            customer => expect(customer[namaField]).toEqual(nilaiExisting)
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.submit(form('customer'));
+    });
+  };
+
+  describe('field nama depan', () => {
+
+    itDirenderSebagaiBoxInputTeks('namaDepan');
+
+    itMenyertakanNilaiYangExisting('namaDepan');
+
+    itNgerenderLabel('namaDepan', 'Nama depan');
+
+    itAssignIdSesuaiIdLabel('namaDepan');
+
+    itNgesubmitNilaiExisting('namaDepan', 'Mary');
+
+    itNgesubmitNilaiInputBaru('namaDepan', 'Mary');
   });
+
 });
