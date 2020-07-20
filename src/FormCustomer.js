@@ -7,25 +7,11 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
   // dengan nilai key dari props di atas.
   const [ customer, setCustomer ] = useState({ namaDepan, namaBelakang, nomorTelepon });
 
-  const handleChangeNamaDepan = ({ target }) => {
-    setCustomer((customer) => ({
-      ...customer,
-      namaDepan: target.value
-    }))
-  };
-
-  const handleChangeNamaBelakang = ({ target }) => {
+  const handleChangeDiInput = ({ target }) => {
     setCustomer(customer => ({
       ...customer,
-      namaBelakang: target.value
-    }))
-  };
-
-  const handleChangeNomorTelepon = ({ target }) => {
-    setCustomer(customer => ({
-      ...customer,
-      nomorTelepon: target.value
-    }))
+      [target.name]: target.value
+    }));
   };
 
   // Form di komponen ini pakai event handler yang memanggil function
@@ -52,13 +38,13 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
   return (
     <form id="customer" onSubmit={() => onSubmit(customer)}>
       <label htmlFor="namaDepan">Nama depan</label>
-      <input id="namaDepan" type="text" name="namaDepan" value={namaDepan} onChange={handleChangeNamaDepan} />
+      <input id="namaDepan" type="text" name="namaDepan" value={namaDepan} onChange={handleChangeDiInput} />
 
       <label htmlFor="namaBelakang">Nama belakang</label>
-      <input id="namaBelakang" type="text" name="namaBelakang" value={namaBelakang} onChange={handleChangeNamaBelakang} />
+      <input id="namaBelakang" type="text" name="namaBelakang" value={namaBelakang} onChange={handleChangeDiInput} />
 
       <label htmlFor="nomorTelepon">Nomor telepon</label>
-      <input id="nomorTelepon" type="text" name="nomorTelepon" value={nomorTelepon} onChange={handleChangeNomorTelepon} />
+      <input id="nomorTelepon" type="text" name="nomorTelepon" value={nomorTelepon} onChange={handleChangeDiInput} />
     </form>
   );
 };
