@@ -45,6 +45,8 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
 
       <label htmlFor="nomorTelepon">Nomor telepon</label>
       <input id="nomorTelepon" type="text" name="nomorTelepon" value={nomorTelepon} onChange={handleChangeDiInput} />
+
+      <input type="submit" value="Simpan" />
     </form>
   );
 };

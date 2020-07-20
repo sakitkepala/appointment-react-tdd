@@ -21,6 +21,14 @@ describe('FormCustomer', () => {
     expect(form('customer')).not.toBeNull();
   });
 
+  it('punya tombol submit', () => {
+    render(<FormCustomer />);
+
+    const tombolSubmit = form('customer').querySelector('input[type="submit"]');
+
+    expect(tombolSubmit).not.toBeNull();
+  });
+
   const expectFieldInputTipenyaText = elemenForm => {
     // expect(elemenForm).not.toBe(undefined);
     expect(elemenForm).not.toBeNull();
