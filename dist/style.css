@@ -94,7 +94,7 @@ table {
   border-collapse: collapse;
 }
 
-table#time-slots td {
+table#time-slot td {
   grid-column-start: 2;
   grid-column-end: 3;
   padding: 0;
@@ -105,7 +105,7 @@ table#time-slots td {
   vertical-align: middle;
 }
 
-table#time-slots th {
+table#time-slot th {
   padding-top: 0;
   padding-bottom: 0;
   background: #cef;
@@ -116,7 +116,7 @@ table#time-slots th {
   width: 12.5%;
 }
 
-table#time-slots {
+table#time-slot {
   grid-column-start: 2;
   grid-column-end: 3;
   width: 450px;

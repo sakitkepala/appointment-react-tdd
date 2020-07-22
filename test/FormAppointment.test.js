@@ -116,4 +116,26 @@ describe('FormAppointment', () => {
       await ReactTestUtils.Simulate.submit(form('appointment'));
     });
   });
+
+  describe('tabel time-slot', () => {
+
+    const tabelTimeSlot = () => container.querySelector('table#time-slot');
+
+    it('nge-render tabel untuk time-slot', () => {
+      render(<FormAppointment />);
+
+      expect(tabelTimeSlot()).not.toBeNull();
+    });
+
+    it('nge-render satu time-slot tiap setengah jam antara waktu buka dan tutup', () => {
+      render(<FormAppointment bukaPada={9} tutupPada={11} />);
+
+      const jumlahSlotTime = tabelTimeSlot().querySelectorAll('tbody >* th');
+
+      expect(jumlahSlotTime).toHaveLength(4);
+      expect(jumlahSlotTime[0].textContent).toEqual('09:00');
+      expect(jumlahSlotTime[1].textContent).toEqual('09:30');
+      expect(jumlahSlotTime[3].textContent).toEqual('10:30');
+    });
+  });
 });
