@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 
-const FormAppointment = ({ layananTersedia, layanan, handleSubmit, bukaPada, tutupPada }) => {
+const FormAppointment = ({ layananTersedia, layanan, handleSubmit, bukaPada, tutupPada, hariIni }) => {
   let [appointment, setAppointment] = useState({ layanan });
   
   const handleChangeLayanan = ({ target }) => {
@@ -19,7 +19,7 @@ const FormAppointment = ({ layananTersedia, layanan, handleSubmit, bukaPada, tut
         {layananTersedia.map(item => <option key={item}>{item}</option>)}
       </select>
 
-      <TabelTimeSlot bukaPada={bukaPada} tutupPada={tutupPada} />
+      <TabelTimeSlot bukaPada={bukaPada} tutupPada={tutupPada} hariIni={hariIni} />
     </form>
   );
 };
@@ -32,7 +32,8 @@ FormAppointment.defaultProps = {
     'Perawatan kuku'
   ],
   bukaPada: 9,
-  tutupPada: 19
+  tutupPada: 19,
+  hariIni: new Date()
 };
 
 const timeSlotHarian = (bukaPada, tutupPada) => {
@@ -46,12 +47,39 @@ const timeSlotHarian = (bukaPada, tutupPada) => {
     );
 };
 
+const nilaiTanggalMingguan = tanggalMulai => {
+  const tengahMalam = new Date(tanggalMulai).setHours(0, 0, 0, 0);
+  const increment = 24 * 60 * 60 * 1000;
+  return Array(7)
+    .fill([tengahMalam])
+    .reduce((acc, _, i) =>
+      acc.concat([tengahMalam + (i * increment)])
+    );
+};
+
 const toTimeValue = timestamp => new Date(timestamp).toTimeString().substring(0, 5);
 
-const TabelTimeSlot = ({ bukaPada, tutupPada }) => {
+const toShortDate = timestamp => {
+  const [day, , dayOfMonth] = new Date(timestamp)
+    .toDateString()
+    .split(' ');
+  return `${day} ${dayOfMonth}`;
+};
+
+const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni }) => {
   const timeSlot = timeSlotHarian(bukaPada, tutupPada);
+  const tanggalSeminggu = nilaiTanggalMingguan(hariIni);
+
   return (
     <table id="time-slot">
+      <thead>
+        <tr>
+          <th />
+          {tanggalSeminggu.map(tanggal => (
+            <th key={tanggal}>{toShortDate(tanggal)}</th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
         {timeSlot.map(slot => (
           <tr key={slot}>

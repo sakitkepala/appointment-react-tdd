@@ -137,5 +137,27 @@ describe('FormAppointment', () => {
       expect(jumlahSlotTime[1].textContent).toEqual('09:30');
       expect(jumlahSlotTime[3].textContent).toEqual('10:30');
     });
+
+    it('nge-render cell kosong di depan baris header', () => {
+      render(<FormAppointment />);
+
+      const barisHeader = tabelTimeSlot().querySelector('thead > tr');
+
+      expect(barisHeader.firstChild.textContent).toEqual('');
+    });
+
+    it('nge-render tanggal-tanggal yang available dalam seminggu', () => {
+      const hariIni = new Date(2020, 6, 22);
+      render(<FormAppointment hariIni={hariIni} />);
+
+      const tanggal = tabelTimeSlot().querySelectorAll(
+        'thead >* th:not(:first-child)'
+      );
+
+      expect(tanggal).toHaveLength(7);
+      expect(tanggal[0].textContent).toEqual('Wed 22');
+      expect(tanggal[1].textContent).toEqual('Thu 23');
+      expect(tanggal[6].textContent).toEqual('Tue 28');
+    });
   });
 });
