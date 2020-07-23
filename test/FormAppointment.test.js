@@ -159,5 +159,27 @@ describe('FormAppointment', () => {
       expect(tanggal[1].textContent).toEqual('Thu 23');
       expect(tanggal[6].textContent).toEqual('Tue 28');
     });
+
+    it('nge-render radio button untuk masing-masing slot', () => {
+      const hariIni = new Date();
+      const slotTersedia = [
+        { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
+        { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
+      ]
+      render(<FormAppointment timeSlotTersedia={slotTersedia} hariIni={hariIni} />);
+
+      const semuaCell = tabelTimeSlot().querySelectorAll('td');
+      
+      expect(semuaCell[0].querySelector('input[type="radio"]')).not.toBeNull();
+      expect(semuaCell[7].querySelector('input[type="radio"]')).not.toBeNull();
+    });
+
+    it('tidak nge-render radio button untuk slot yang tidak available', () => {
+      render(<FormAppointment timeSlotTersedia={[]} />);
+      
+      const jumlahSlotTime = tabelTimeSlot().querySelectorAll('input');
+
+      expect(jumlahSlotTime).toHaveLength(0);
+    });
   });
 });

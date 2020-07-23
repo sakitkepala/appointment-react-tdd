@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 
 
-const FormAppointment = ({ layananTersedia, layanan, handleSubmit, bukaPada, tutupPada, hariIni }) => {
+const FormAppointment = ({
+  layananTersedia,
+  layanan,
+  handleSubmit,
+  bukaPada,
+  tutupPada,
+  hariIni,
+  timeSlotTersedia
+}) => {
   let [appointment, setAppointment] = useState({ layanan });
   
   const handleChangeLayanan = ({ target }) => {
@@ -19,7 +27,11 @@ const FormAppointment = ({ layananTersedia, layanan, handleSubmit, bukaPada, tut
         {layananTersedia.map(item => <option key={item}>{item}</option>)}
       </select>
 
-      <TabelTimeSlot bukaPada={bukaPada} tutupPada={tutupPada} hariIni={hariIni} />
+      <TabelTimeSlot
+        bukaPada={bukaPada}
+        tutupPada={tutupPada}
+        hariIni={hariIni}
+        timeSlotTersedia={timeSlotTersedia} />
     </form>
   );
 };
@@ -33,8 +45,10 @@ FormAppointment.defaultProps = {
   ],
   bukaPada: 9,
   tutupPada: 19,
-  hariIni: new Date()
+  hariIni: new Date(),
+  timeSlotTersedia: []
 };
+
 
 const timeSlotHarian = (bukaPada, tutupPada) => {
   const slotTotal = (tutupPada - bukaPada) * 2;
@@ -66,7 +80,17 @@ const toShortDate = timestamp => {
   return `${day} ${dayOfMonth}`;
 };
 
-const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni }) => {
+const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
+  const waktu = new Date(timeSlot);
+  return new Date(tanggal).setHours(
+    waktu.getHours(),
+    waktu.getMinutes(),
+    waktu.getSeconds(),
+    waktu.getMilliseconds()
+  );
+};
+
+const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
   const timeSlot = timeSlotHarian(bukaPada, tutupPada);
   const tanggalSeminggu = nilaiTanggalMingguan(hariIni);
 
@@ -84,6 +108,14 @@ const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni }) => {
         {timeSlot.map(slot => (
           <tr key={slot}>
             <th>{toTimeValue(slot)}</th>
+            {tanggalSeminggu.map(tanggal => (
+              <td key={tanggal}>
+                {timeSlotTersedia.some(slotTersedia =>
+                  slotTersedia.mulaiPada === mergeTanggalDanWaktu(tanggal, slot)
+                ) ?
+                (<input type="radio" />) : null}
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>
