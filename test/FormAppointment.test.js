@@ -121,6 +121,8 @@ describe('FormAppointment', () => {
 
     const tabelTimeSlot = () => container.querySelector('table#time-slot');
 
+    const fieldMulaiPada = indeks => container.querySelectorAll('input[name="mulaiPada"]')[indeks];
+
     it('nge-render tabel untuk time-slot', () => {
       render(<FormAppointment />);
 
@@ -165,11 +167,11 @@ describe('FormAppointment', () => {
       const slotTersedia = [
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
         { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
-      ]
+      ];
       render(<FormAppointment timeSlotTersedia={slotTersedia} hariIni={hariIni} />);
 
       const semuaCell = tabelTimeSlot().querySelectorAll('td');
-      
+
       expect(semuaCell[0].querySelector('input[type="radio"]')).not.toBeNull();
       expect(semuaCell[7].querySelector('input[type="radio"]')).not.toBeNull();
     });
@@ -180,6 +182,18 @@ describe('FormAppointment', () => {
       const jumlahSlotTime = tabelTimeSlot().querySelectorAll('input');
 
       expect(jumlahSlotTime).toHaveLength(0);
+    });
+
+    it('nge-set value radio button dengan index appointment yang dimaksud', () => {
+      const hariIni = new Date();
+      const slotTersedia = [
+        { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
+        { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
+      ];
+      render(<FormAppointment timeSlotTersedia={slotTersedia} hariIni={hariIni} />);
+
+      expect(fieldMulaiPada(0).value).toEqual(slotTersedia[0].mulaiPada.toString());
+      expect(fieldMulaiPada(1).value).toEqual(slotTersedia[1].mulaiPada.toString());
     });
   });
 });

@@ -105,15 +105,15 @@ const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
         </tr>
       </thead>
       <tbody>
-        {timeSlot.map(slot => (
-          <tr key={slot}>
-            <th>{toTimeValue(slot)}</th>
+        {timeSlot.map(waktuSlot => (
+          <tr key={waktuSlot}>
+            <th>{toTimeValue(waktuSlot)}</th>
             {tanggalSeminggu.map(tanggal => (
               <td key={tanggal}>
-                {timeSlotTersedia.some(slotTersedia =>
-                  slotTersedia.mulaiPada === mergeTanggalDanWaktu(tanggal, slot)
-                ) ?
-                (<input type="radio" />) : null}
+                <RadioButtonJikaTersedia
+                  timeSlotTersedia={timeSlotTersedia}
+                  tanggal={tanggal}
+                  waktuSlot={waktuSlot} />
               </td>
             ))}
           </tr>
@@ -121,6 +121,16 @@ const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
       </tbody>
     </table>
   );
+};
+
+const RadioButtonJikaTersedia = ({timeSlotTersedia, tanggal, waktuSlot }) => {
+  const mulaiPada = mergeTanggalDanWaktu(tanggal, waktuSlot);
+  if ( timeSlotTersedia.some(slotTersedia => slotTersedia.mulaiPada === mulaiPada) ) {
+    return (
+      <input type="radio" name="mulaiPada" value={mulaiPada} />
+    );
+  }
+  return null;
 };
 
 export { FormAppointment };
