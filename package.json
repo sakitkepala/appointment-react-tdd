@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github.com/sakitkepala.git"
+    "url": "https://github.com/sakitkepala/appointment-react-tdd.git"
   },
   "author": "Andika",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/github.com/sakitkepala/issues"
+    "url": "https://github.com/sakitkepala/appointment-react-tdd/issues"
   },
-  "homepage": "https://github.com/github.com/sakitkepala#readme",
+  "homepage": "https://github.com/sakitkepala/appointment-react-tdd",
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
