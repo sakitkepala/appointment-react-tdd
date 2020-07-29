@@ -195,5 +195,66 @@ describe('FormAppointment', () => {
       expect(fieldMulaiPada(0).value).toEqual(slotTersedia[0].mulaiPada.toString());
       expect(fieldMulaiPada(1).value).toEqual(slotTersedia[1].mulaiPada.toString());
     });
+
+    it('secara default pilih radio button dari nilai existing', () => {
+      const hariIni = new Date();
+      const slotTersedia = [
+        { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
+        { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
+      ];
+      render(
+        <FormAppointment
+          timeSlotTersedia={slotTersedia}
+          hariIni={hariIni}
+          mulaiPada={slotTersedia[0].mulaiPada} />
+      );
+
+      expect(fieldMulaiPada(0).checked).toBeTruthy();
+      expect(fieldMulaiPada(1).checked).toBeFalsy();
+    });
+
+    it('simpan nilai existing radio button-nya saat disubmit', () => {
+      expect.hasAssertions();
+      const hariIni = new Date();
+      const slotTersedia = [
+        { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
+        { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
+      ];
+      render(
+        <FormAppointment
+          timeSlotTersedia={slotTersedia}
+          hariIni={hariIni}
+          mulaiPada={slotTersedia[0].mulaiPada}
+          handleSubmit={
+            ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[0].mulaiPada)
+          } />
+      );
+      ReactTestUtils.Simulate.submit(form('appointment'));
+    });
+
+    it('simpan nilai input baru radio button saat disumbit', () => {
+      expect.hasAssertions();
+      const hariIni = new Date();
+      const slotTersedia = [
+        { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
+        { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
+      ];
+      render(
+        <FormAppointment
+        timeSlotTersedia={slotTersedia}
+        hariIni={hariIni}
+        mulaiPada={slotTersedia[0].mulaiPada}
+        handleSubmit={
+          ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[1].mulaiPada)
+        } />
+      );
+      ReactTestUtils.Simulate.change(fieldMulaiPada(1), {
+        target: {
+          value: slotTersedia[1].mulaiPada.toString(),
+          name: 'mulaiPada'
+        }
+      });
+      ReactTestUtils.Simulate.submit(form('appointment'));
+    });
   });
 });

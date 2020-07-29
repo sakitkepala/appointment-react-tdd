@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 
 const FormAppointment = ({
@@ -8,9 +8,10 @@ const FormAppointment = ({
   bukaPada,
   tutupPada,
   hariIni,
-  timeSlotTersedia
+  timeSlotTersedia,
+  mulaiPada
 }) => {
-  let [appointment, setAppointment] = useState({ layanan });
+  let [appointment, setAppointment] = useState({ layanan, mulaiPada });
   
   const handleChangeLayanan = ({ target }) => {
     setAppointment(appointment => ({
@@ -18,6 +19,14 @@ const FormAppointment = ({
       layanan: target.value
     }));
   };
+
+  const handleChangeMulaiPada = useCallback((
+    ({ target: { value } }) =>{
+      return setAppointment(appointment => ({
+        ...appointment,
+        mulaiPada: parseInt(value)
+      }));}
+  ), []);
 
   return (
     <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
@@ -31,7 +40,9 @@ const FormAppointment = ({
         bukaPada={bukaPada}
         tutupPada={tutupPada}
         hariIni={hariIni}
-        timeSlotTersedia={timeSlotTersedia} />
+        timeSlotTersedia={timeSlotTersedia}
+        mulaiPada={appointment.mulaiPada}
+        handleChange={handleChangeMulaiPada} />
     </form>
   );
 };
@@ -90,8 +101,8 @@ const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
   );
 };
 
-const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
-  const timeSlot = timeSlotHarian(bukaPada, tutupPada);
+const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia, mulaiPada, handleChange }) => {
+  const slotSlot = timeSlotHarian(bukaPada, tutupPada);
   const tanggalSeminggu = nilaiTanggalMingguan(hariIni);
 
   return (
@@ -105,15 +116,17 @@ const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
         </tr>
       </thead>
       <tbody>
-        {timeSlot.map(waktuSlot => (
-          <tr key={waktuSlot}>
-            <th>{toTimeValue(waktuSlot)}</th>
+        {slotSlot.map(timeSlot => (
+          <tr key={timeSlot}>
+            <th>{toTimeValue(timeSlot)}</th>
             {tanggalSeminggu.map(tanggal => (
               <td key={tanggal}>
                 <RadioButtonJikaTersedia
                   timeSlotTersedia={timeSlotTersedia}
                   tanggal={tanggal}
-                  waktuSlot={waktuSlot} />
+                  timeSlot={timeSlot}
+                  slotDipilih={mulaiPada}
+                  handleChange={handleChange} />
               </td>
             ))}
           </tr>
@@ -123,11 +136,18 @@ const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia }) => {
   );
 };
 
-const RadioButtonJikaTersedia = ({timeSlotTersedia, tanggal, waktuSlot }) => {
-  const mulaiPada = mergeTanggalDanWaktu(tanggal, waktuSlot);
+
+const RadioButtonJikaTersedia = ({timeSlotTersedia, tanggal, timeSlot, slotDipilih, handleChange }) => {
+  const mulaiPada = mergeTanggalDanWaktu(tanggal, timeSlot);
   if ( timeSlotTersedia.some(slotTersedia => slotTersedia.mulaiPada === mulaiPada) ) {
+    const isChecked = mulaiPada === slotDipilih;
     return (
-      <input type="radio" name="mulaiPada" value={mulaiPada} />
+      <input
+        type="radio"
+        name="mulaiPada"
+        value={mulaiPada}
+        checked={isChecked}
+        onChange={handleChange} />
     );
   }
   return null;
