@@ -43,6 +43,8 @@ const FormAppointment = ({
         timeSlotTersedia={timeSlotTersedia}
         mulaiPada={appointment.mulaiPada}
         handleChange={handleChangeMulaiPada} />
+      
+      <input type="submit" value="Simpan" />
     </form>
   );
 };
