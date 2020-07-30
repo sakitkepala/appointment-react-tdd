@@ -1,6 +1,47 @@
 import React, { useState, useCallback } from 'react';
 
 
+const timeSlotHarian = (bukaPada, tutupPada) => {
+  const slotTotal = (tutupPada - bukaPada) * 2;
+  const waktuMulai = new Date().setHours(bukaPada, 0, 0, 0);
+  const increment = 30 * 60 * 1000;
+  return Array(slotTotal)
+    .fill([waktuMulai])
+    .reduce((acc, _, i) =>
+      acc.concat([waktuMulai + (i * increment)])
+    );
+};
+
+const nilaiTanggalMingguan = tanggalMulai => {
+  const tengahMalam = new Date(tanggalMulai).setHours(0, 0, 0, 0);
+  const increment = 24 * 60 * 60 * 1000;
+  return Array(7)
+    .fill([tengahMalam])
+    .reduce((acc, _, i) =>
+      acc.concat([tengahMalam + (i * increment)])
+    );
+};
+
+const toTimeValue = timestamp => new Date(timestamp).toTimeString().substring(0, 5);
+
+const toShortDate = timestamp => {
+  const [day, , dayOfMonth] = new Date(timestamp)
+    .toDateString()
+    .split(' ');
+  return `${day} ${dayOfMonth}`;
+};
+
+const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
+  const waktu = new Date(timeSlot);
+  return new Date(tanggal).setHours(
+    waktu.getHours(),
+    waktu.getMinutes(),
+    waktu.getSeconds(),
+    waktu.getMilliseconds()
+  );
+};
+
+
 const FormAppointment = ({
   layananTersedia,
   layanan,
@@ -62,46 +103,6 @@ FormAppointment.defaultProps = {
   timeSlotTersedia: []
 };
 
-
-const timeSlotHarian = (bukaPada, tutupPada) => {
-  const slotTotal = (tutupPada - bukaPada) * 2;
-  const waktuMulai = new Date().setHours(bukaPada, 0, 0, 0);
-  const increment = 30 * 60 * 1000;
-  return Array(slotTotal)
-    .fill([waktuMulai])
-    .reduce((acc, _, i) =>
-      acc.concat([waktuMulai + (i * increment)])
-    );
-};
-
-const nilaiTanggalMingguan = tanggalMulai => {
-  const tengahMalam = new Date(tanggalMulai).setHours(0, 0, 0, 0);
-  const increment = 24 * 60 * 60 * 1000;
-  return Array(7)
-    .fill([tengahMalam])
-    .reduce((acc, _, i) =>
-      acc.concat([tengahMalam + (i * increment)])
-    );
-};
-
-const toTimeValue = timestamp => new Date(timestamp).toTimeString().substring(0, 5);
-
-const toShortDate = timestamp => {
-  const [day, , dayOfMonth] = new Date(timestamp)
-    .toDateString()
-    .split(' ');
-  return `${day} ${dayOfMonth}`;
-};
-
-const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
-  const waktu = new Date(timeSlot);
-  return new Date(tanggal).setHours(
-    waktu.getHours(),
-    waktu.getMinutes(),
-    waktu.getSeconds(),
-    waktu.getMilliseconds()
-  );
-};
 
 const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia, mulaiPada, handleChange }) => {
   const slotSlot = timeSlotHarian(bukaPada, tutupPada);

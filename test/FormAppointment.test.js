@@ -14,7 +14,6 @@ describe('FormAppointment', () => {
   const form = id => container.querySelector(`form[id="${id}"]`);
   const field = namaField => form('appointment').elements[namaField];
   const labelFor = forElemen => container.querySelector(`label[for="${forElemen}"]`);
-
   const cariOption = (nodeDropdown, textContent) => {
     const options = Array.from(nodeDropdown.childNodes);
     return options.find(
@@ -26,6 +25,14 @@ describe('FormAppointment', () => {
     render(<FormAppointment />);
 
     expect(form('appointment')).not.toBeNull();
+  });
+
+  it('ada tombol submitnya', () => {
+    render(<FormAppointment />);
+
+    const tombolSubmit = container.querySelector('input[type="submit"]');
+
+    expect(tombolSubmit).not.toBeNull();
   });
 
   describe('field layanan', () => {
