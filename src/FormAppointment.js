@@ -45,6 +45,8 @@ const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
 const FormAppointment = ({
   layananTersedia,
   layanan,
+  pilihanStylist,
+  stylist,
   handleSubmit,
   bukaPada,
   tutupPada,
@@ -52,12 +54,12 @@ const FormAppointment = ({
   timeSlotTersedia,
   mulaiPada
 }) => {
-  let [appointment, setAppointment] = useState({ layanan, mulaiPada });
+  let [appointment, setAppointment] = useState({ layanan, mulaiPada, stylist });
   
-  const handleChangeLayanan = ({ target }) => {
+  const handleChangeInput = ({ target }) => {
     setAppointment(appointment => ({
       ...appointment,
-      layanan: target.value
+      [target.name]: target.value
     }));
   };
 
@@ -72,9 +74,15 @@ const FormAppointment = ({
   return (
     <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
       <label htmlFor="layanan">Layanan</label>
-      <select id="layanan" name="layanan" value={layanan} onChange={handleChangeLayanan}>
+      <select id="layanan" name="layanan" value={layanan} onChange={handleChangeInput}>
         <option />
         {layananTersedia.map(item => <option key={item}>{item}</option>)}
+      </select>
+
+      <label htmlFor="stylist">Stylist</label>
+      <select id="stylist" name="stylist" value={stylist} onChange={handleChangeInput}>
+        <option />
+        {pilihanStylist.map(s => <option key={s}>{s}</option>)}
       </select>
 
       <TabelTimeSlot
@@ -96,6 +104,10 @@ FormAppointment.defaultProps = {
     'Sisir bulu',
     'Keramas anti-kutu',
     'Perawatan kuku'
+  ],
+  pilihanStylist: [
+    'nama',
+    'stylistnya'
   ],
   bukaPada: 9,
   tutupPada: 19,

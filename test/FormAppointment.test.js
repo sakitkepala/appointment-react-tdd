@@ -35,23 +35,108 @@ describe('FormAppointment', () => {
     expect(tombolSubmit).not.toBeNull();
   });
 
-  describe('field layanan', () => {
-
-    it('nge-render box select', () => {
+  const itDirenderJadiKotakSelect = namaField => {
+    it('dirender jadi kotak select', () => {
       render(<FormAppointment />);
 
-      expect(field('layanan')).not.toBeNull();
-      expect(field('layanan').tagName).toEqual('SELECT');
+      expect(field(namaField)).not.toBeNull();
+      expect(field(namaField).tagName).toEqual('SELECT');
     });
+  };
 
+  const itAwalnyaYangTerpilihNilaiKosong = namaField => {
     it('awalnya yang terpilih nilai kosong', () => {
       render(<FormAppointment />);
 
-      const nodePertama = field('layanan').childNodes[0];
+      const nodePertama = field(namaField).childNodes[0];
 
       expect(nodePertama.value).toEqual('');
       expect(nodePertama.selected).toBeTruthy();
     });
+  };
+
+  const itNgrenderLabelField = (namaField, teksLabel) => {
+    it('nge-render label field', () => {
+      render(<FormAppointment />);
+
+      expect(labelFor(namaField).textContent).toEqual(teksLabel);
+    });
+  };
+
+  const itKasihIdYangSesuaiIdLabelnya = namaField => {
+    it('kasih id yang sesuai id labelnya', () => {
+      render(<FormAppointment />);
+
+      expect(field(namaField).id).toEqual(namaField);
+    });
+  };
+
+  const itPilihDuluNilaiExistingDiAwal = (namaField, props, nilaiExisting) => { 
+    it('pilih dulu nilai yang existing di awal', () => {
+      render(
+        <FormAppointment
+          {...props}
+          {...{ [namaField]: nilaiExisting }} />
+      );
+
+      const option = cariOption(field(namaField), nilaiExisting);
+
+      expect(option.selected).toBeTruthy();
+    });
+  };
+
+  const itSubmitDenganNilaiExisting = namaField => {
+    it('submit nilai select yang existing', async () => {
+      expect.hasAssertions();
+      render(
+        <FormAppointment
+          {...{ [namaField]: 'nilainya' }}
+          handleSubmit={
+            props => expect(props[namaField]).toEqual('nilainya')
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.submit(form('appointment'));
+    });
+  };
+
+  const itSubmitNilaiSelectInputBaru = namaField => {
+    it('submit nilai select yang input baru', async () => {
+      expect.hasAssertions();
+      render(
+        <FormAppointment
+          {...{ [namaField]: 'nilai existing' }}
+          handleSubmit={
+            props => expect(props[namaField]).toEqual('nilai baru')
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.change(field(namaField), {
+        target: { value: 'nilai baru', name: namaField }
+      });
+      await ReactTestUtils.Simulate.submit(form('appointment'));
+    });
+  };
+
+  describe('field layanan', () => {
+
+    itDirenderJadiKotakSelect('layanan');
+    
+    itAwalnyaYangTerpilihNilaiKosong('layanan');
+
+    itNgrenderLabelField('layanan', 'Layanan');
+
+    itKasihIdYangSesuaiIdLabelnya('layanan');
+
+    itPilihDuluNilaiExistingDiAwal(
+      'layanan',
+      { layananTersedia: ['Layanan A', 'Layanan B'] },
+      'Layanan B'
+    );
+
+    itSubmitDenganNilaiExisting('layanan');
+
+    itSubmitNilaiSelectInputBaru('layanan');
 
     it('mencantumkan semua layanan tukang cukur', () => {
       const layananTersedia = ['Layanan A', 'Layanan B'];
@@ -68,60 +153,27 @@ describe('FormAppointment', () => {
         expect.arrayContaining(layananTersedia)
       );
     });
+  });
 
-    it('pilih dulu nilai yang existing di awal', () => {
-      const layananTersedia = ['Layanan A', 'Layanan B'];
-      render(<FormAppointment layananTersedia={layananTersedia} layanan="Layanan B" />);
+  describe('field stylist', () => {
 
-      const option = cariOption(field('layanan'), 'Layanan B');
+    itDirenderJadiKotakSelect('stylist');
+    
+    itAwalnyaYangTerpilihNilaiKosong('stylist');
 
-      expect(option.selected).toBeTruthy();
-    });
+    itNgrenderLabelField('stylist', 'Stylist');
 
-    it('nge-render label field layanan', () => {
-      render(<FormAppointment />);
+    itKasihIdYangSesuaiIdLabelnya('stylist');
 
-      expect(labelFor('layanan').textContent).toEqual('Layanan');
-    });
+    itPilihDuluNilaiExistingDiAwal(
+      'stylist',
+      { pilihanStylist: ['King', 'Agung'] },
+      'Agung'
+    );
 
-    it('kasih id yang sesuai id labelnya', () => {
-      render(<FormAppointment />);
+    itSubmitDenganNilaiExisting('stylist');
 
-      expect(field('layanan').id).toEqual('layanan');
-    });
-
-    it('submit nilai select yang existing', async () => {
-      expect.hasAssertions();
-      const layananTersedia = ['Layanan A', 'Layanan B'];
-      render(
-        <FormAppointment
-          layananTersedia={layananTersedia}
-          layanan="Layanan A"
-          handleSubmit={
-            ({ layanan }) => expect(layanan).toEqual('Layanan A')
-          }
-        />
-      );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
-    });
-
-    it('submit nilai select yang input baru', async () => {
-      expect.hasAssertions();
-      const layananTersedia = ['Layanan A', 'Layanan B'];
-      render(
-        <FormAppointment
-          layananTersedia={layananTersedia}
-          layanan="Layanan A"
-          handleSubmit={
-            ({ layanan }) => expect(layanan).toEqual('Layanan B')
-          }
-        />
-      );
-      await ReactTestUtils.Simulate.change(field('layanan'), {
-        target: { value: 'Layanan B' }
-      });
-      await ReactTestUtils.Simulate.submit(form('appointment'));
-    });
+    itSubmitNilaiSelectInputBaru('stylist');
   });
 
   describe('tabel time-slot', () => {
