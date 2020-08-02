@@ -141,7 +141,7 @@ describe('FormAppointment', () => {
     });
 
     itSubmitNilaiSelectInputBaru('layanan', {
-      stylistMenurutLayanan: { 'nilai existing': [] }
+      stylistMenurutLayanan: { 'nilai existing': [], 'nilai baru': [] }
     });
 
     it('mencantumkan semua layanan tukang cukur', () => {
@@ -192,9 +192,12 @@ describe('FormAppointment', () => {
         <FormAppointment
           layananTersedia={layananTersedia}
           stylistTersedia={stylistTersedia}
-          stylistMenurutLayanan={stylistMenurutLayanan}
-          layanan="1" />
+          stylistMenurutLayanan={stylistMenurutLayanan} />
       );
+
+      ReactTestUtils.Simulate.change(field('layanan'), {
+        target: { value: '1', name: 'layanan' }
+      });
 
       const opsiNode = Array.from(field('stylist').childNodes);
       const stylistDirender = opsiNode.map(n => n.textContent);
@@ -328,12 +331,12 @@ describe('FormAppointment', () => {
       ];
       render(
         <FormAppointment
-        timeSlotTersedia={slotTersedia}
-        hariIni={hariIni}
-        mulaiPada={slotTersedia[0].mulaiPada}
-        handleSubmit={
-          ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[1].mulaiPada)
-        } />
+          timeSlotTersedia={slotTersedia}
+          hariIni={hariIni}
+          mulaiPada={slotTersedia[0].mulaiPada}
+          handleSubmit={
+            ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[1].mulaiPada)
+          } />
       );
       ReactTestUtils.Simulate.change(fieldMulaiPada(1), {
         target: {
@@ -342,6 +345,38 @@ describe('FormAppointment', () => {
         }
       });
       ReactTestUtils.Simulate.submit(form('appointment'));
+    });
+
+    it('filter appointment menurut stylist yang terpilih', () => {
+      const hariIni = new Date();
+      const timeSlotTersedia = [
+        { 
+          mulaiPada: hariIni.setHours(9, 0, 0, 0),
+          stylist: ['A', 'B']
+        },
+        { 
+          mulaiPada: hariIni.setHours(9, 30, 0, 0),
+          stylist: ['A']
+        }
+      ];
+      
+      render(
+        <FormAppointment
+          timeSlotTersedia={timeSlotTersedia}
+          hariIni={hariIni} />
+      );
+
+      ReactTestUtils.Simulate.change(field('stylist'), {
+        target: { value: 'B', name: 'stylist' }
+      });
+
+      const cell = tabelTimeSlot().querySelectorAll('td');
+      expect(
+        cell[0].querySelector('input[type="radio"]')
+      ).not.toBeNull();
+      expect(
+        cell[7].querySelector('input[type="radio"]')
+      ).toBeNull();
     });
   });
 });

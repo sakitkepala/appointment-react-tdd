@@ -125,7 +125,15 @@ const FormAppointment = ({
       }));}
   ), []);
 
-  let pilihanStylist = layanan ? stylistMenurutLayanan[layanan] : stylistTersedia;
+  let pilihanStylist = appointment.layanan
+    ? stylistMenurutLayanan[appointment.layanan]
+    : stylistTersedia;
+
+  let timeslotMenurutStylist = appointment.stylist
+    ? timeSlotTersedia.filter(
+        slot => slot.stylist.includes(appointment.stylist)
+      )
+    : timeSlotTersedia;
 
   return (
     <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
@@ -145,7 +153,7 @@ const FormAppointment = ({
         bukaPada={bukaPada}
         tutupPada={tutupPada}
         hariIni={hariIni}
-        timeSlotTersedia={timeSlotTersedia}
+        timeSlotTersedia={timeslotMenurutStylist}
         mulaiPada={appointment.mulaiPada}
         handleChange={handleChangeMulaiPada} />
       
