@@ -85,11 +85,12 @@ describe('FormAppointment', () => {
     });
   };
 
-  const itSubmitDenganNilaiExisting = namaField => {
+  const itSubmitDenganNilaiExisting = (namaField, props) => {
     it('submit nilai select yang existing', async () => {
       expect.hasAssertions();
       render(
         <FormAppointment
+          {...props}
           {...{ [namaField]: 'nilainya' }}
           handleSubmit={
             props => expect(props[namaField]).toEqual('nilainya')
@@ -100,11 +101,12 @@ describe('FormAppointment', () => {
     });
   };
 
-  const itSubmitNilaiSelectInputBaru = namaField => {
+  const itSubmitNilaiSelectInputBaru = (namaField, props) => {
     it('submit nilai select yang input baru', async () => {
       expect.hasAssertions();
       render(
         <FormAppointment
+          {...props}
           {...{ [namaField]: 'nilai existing' }}
           handleSubmit={
             props => expect(props[namaField]).toEqual('nilai baru')
@@ -130,16 +132,20 @@ describe('FormAppointment', () => {
 
     itPilihDuluNilaiExistingDiAwal(
       'layanan',
-      { layananTersedia: ['Layanan A', 'Layanan B'] },
-      'Layanan B'
+      { layananTersedia: ['Cukur', 'Sisir bulu'] },
+      'Sisir bulu'
     );
 
-    itSubmitDenganNilaiExisting('layanan');
+    itSubmitDenganNilaiExisting('layanan', {
+      stylistMenurutLayanan: { 'nilainya': [] }
+    });
 
-    itSubmitNilaiSelectInputBaru('layanan');
+    itSubmitNilaiSelectInputBaru('layanan', {
+      stylistMenurutLayanan: { 'nilai existing': [] }
+    });
 
     it('mencantumkan semua layanan tukang cukur', () => {
-      const layananTersedia = ['Layanan A', 'Layanan B'];
+      const layananTersedia = ['Cukur', 'Sisir bulu'];
 
       render(<FormAppointment layananTersedia={layananTersedia} />);
       const nodeOption = Array.from(
@@ -167,13 +173,35 @@ describe('FormAppointment', () => {
 
     itPilihDuluNilaiExistingDiAwal(
       'stylist',
-      { pilihanStylist: ['King', 'Agung'] },
+      { stylistTersedia: ['King', 'Agung'] },
       'Agung'
     );
 
     itSubmitDenganNilaiExisting('stylist');
 
     itSubmitNilaiSelectInputBaru('stylist');
+
+    it('hanya menampilkan stylist yang bisa mengerjakan layanan yang dipilih', () => {
+      const layananTersedia = ['1', '2'];
+      const stylistTersedia = ['Stylist A', 'Stylist B', 'Stylist C', 'Stylist D'];
+      const stylistMenurutLayanan = {
+        '1': ['Stylist A', 'Stylist B']
+      };
+
+      render(
+        <FormAppointment
+          layananTersedia={layananTersedia}
+          stylistTersedia={stylistTersedia}
+          stylistMenurutLayanan={stylistMenurutLayanan}
+          layanan="1" />
+      );
+
+      const opsiNode = Array.from(field('stylist').childNodes);
+      const stylistDirender = opsiNode.map(n => n.textContent);
+      expect(stylistDirender).toEqual(
+        expect.arrayContaining(['Stylist A', 'Stylist B'])
+      );
+    });
   });
 
   describe('tabel time-slot', () => {

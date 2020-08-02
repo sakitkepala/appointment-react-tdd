@@ -42,80 +42,6 @@ const mergeTanggalDanWaktu = (tanggal, timeSlot) => {
 };
 
 
-const FormAppointment = ({
-  layananTersedia,
-  layanan,
-  pilihanStylist,
-  stylist,
-  handleSubmit,
-  bukaPada,
-  tutupPada,
-  hariIni,
-  timeSlotTersedia,
-  mulaiPada
-}) => {
-  let [appointment, setAppointment] = useState({ layanan, mulaiPada, stylist });
-  
-  const handleChangeInput = ({ target }) => {
-    setAppointment(appointment => ({
-      ...appointment,
-      [target.name]: target.value
-    }));
-  };
-
-  const handleChangeMulaiPada = useCallback((
-    ({ target: { value } }) =>{
-      return setAppointment(appointment => ({
-        ...appointment,
-        mulaiPada: parseInt(value)
-      }));}
-  ), []);
-
-  return (
-    <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
-      <label htmlFor="layanan">Layanan</label>
-      <select id="layanan" name="layanan" value={layanan} onChange={handleChangeInput}>
-        <option />
-        {layananTersedia.map(item => <option key={item}>{item}</option>)}
-      </select>
-
-      <label htmlFor="stylist">Stylist</label>
-      <select id="stylist" name="stylist" value={stylist} onChange={handleChangeInput}>
-        <option />
-        {pilihanStylist.map(s => <option key={s}>{s}</option>)}
-      </select>
-
-      <TabelTimeSlot
-        bukaPada={bukaPada}
-        tutupPada={tutupPada}
-        hariIni={hariIni}
-        timeSlotTersedia={timeSlotTersedia}
-        mulaiPada={appointment.mulaiPada}
-        handleChange={handleChangeMulaiPada} />
-      
-      <input type="submit" value="Simpan" />
-    </form>
-  );
-};
-
-FormAppointment.defaultProps = {
-  layananTersedia: [
-    'Cukur',
-    'Sisir bulu',
-    'Keramas anti-kutu',
-    'Perawatan kuku'
-  ],
-  pilihanStylist: [
-    'nama',
-    'stylistnya'
-  ],
-  bukaPada: 9,
-  tutupPada: 19,
-  hariIni: new Date(),
-  timeSlotTersedia: []
-};
-
-
 const TabelTimeSlot = ({ bukaPada, tutupPada, hariIni, timeSlotTersedia, mulaiPada, handleChange }) => {
   const slotSlot = timeSlotHarian(bukaPada, tutupPada);
   const tanggalSeminggu = nilaiTanggalMingguan(hariIni);
@@ -166,6 +92,90 @@ const RadioButtonJikaTersedia = ({timeSlotTersedia, tanggal, timeSlot, slotDipil
     );
   }
   return null;
+};
+
+
+const FormAppointment = ({
+  layananTersedia,
+  layanan,
+  stylistTersedia,
+  stylistMenurutLayanan,
+  stylist,
+  handleSubmit,
+  bukaPada,
+  tutupPada,
+  hariIni,
+  timeSlotTersedia,
+  mulaiPada
+}) => {
+  let [appointment, setAppointment] = useState({ layanan, mulaiPada, stylist });
+  
+  const handleChangeInput = ({ target }) => {
+    setAppointment(appointment => ({
+      ...appointment,
+      [target.name]: target.value
+    }));
+  };
+
+  const handleChangeMulaiPada = useCallback((
+    ({ target: { value } }) =>{
+      return setAppointment(appointment => ({
+        ...appointment,
+        mulaiPada: parseInt(value)
+      }));}
+  ), []);
+
+  let pilihanStylist = layanan ? stylistMenurutLayanan[layanan] : stylistTersedia;
+
+  return (
+    <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
+      <label htmlFor="layanan">Layanan</label>
+      <select id="layanan" name="layanan" value={layanan} onChange={handleChangeInput}>
+        <option />
+        {layananTersedia.map(item => <option key={item}>{item}</option>)}
+      </select>
+
+      <label htmlFor="stylist">Stylist</label>
+      <select id="stylist" name="stylist" value={stylist} onChange={handleChangeInput}>
+        <option />
+        {pilihanStylist.map(s => <option key={s}>{s}</option>)}
+      </select>
+
+      <TabelTimeSlot
+        bukaPada={bukaPada}
+        tutupPada={tutupPada}
+        hariIni={hariIni}
+        timeSlotTersedia={timeSlotTersedia}
+        mulaiPada={appointment.mulaiPada}
+        handleChange={handleChangeMulaiPada} />
+      
+      <input type="submit" value="Simpan" />
+    </form>
+  );
+};
+
+FormAppointment.defaultProps = {
+  layananTersedia: [
+    'Cukur',
+    'Sisir bulu',
+    'Keramas anti-kutu',
+    'Perawatan kuku'
+  ],
+  stylistTersedia: [
+    'Agung',
+    'Dhanang',
+    'King'
+  ],
+  stylistMenurutLayanan: {
+    'Cukur': ['King'],
+    'Sisir bulu': ['Agung', 'Dhanang', 'King'],
+    'Keramas anti-kutu': ['Dhanang', 'Agung'],
+    'Perawatan kuku': ['Agung'],
+  },
+  bukaPada: 9,
+  tutupPada: 19,
+  hariIni: new Date(),
+  timeSlotTersedia: []
 };
 
 export { FormAppointment };
