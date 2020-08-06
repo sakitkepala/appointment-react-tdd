@@ -47,6 +47,23 @@ describe('FormCustomer', () => {
     expect(tombolSubmit).not.toBeNull();
   });
 
+  it('panggil fetch pakai properti yang benar ketika submit data', () => {
+    const spyFetch = spy();
+    render(<FormCustomer fetch={spyFetch.fn} />);
+
+    ReactTestUtils.Simulate.submit(form('customer'));
+
+    expect(spyFetch).toHaveBeenCalled();
+    expect(spyFetch.argumen(0)).toEqual('/customer');
+
+    const optFetch = spyFetch.argumen(1);
+    expect(optFetch.method).toEqual('POST');
+    expect(optFetch.credentials).toEqual('same-origin');
+    expect(optFetch.headers).toEqual({
+      'Content-Type': 'application/json'
+    });
+  });
+
   const expectFieldInputTipenyaText = elemenForm => {
     // expect(elemenForm).not.toBe(undefined);
     expect(elemenForm).not.toBeNull();
@@ -88,38 +105,39 @@ describe('FormCustomer', () => {
 
   const itNgesubmitNilaiExisting = namaField => {
     it('simpan nilai yang existing ketika disubmit', async () => {
-      const spySubmit = spy();
+      const spyFetch = spy();
       render(
         <FormCustomer
           {...{ [namaField]: 'nilainya' }}
-          onSubmit={spySubmit.fn}
+          fetch={spyFetch.fn}
         />
       );
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(spySubmit).toHaveBeenCalled();
-      expect(spySubmit.argumen(0)[namaField]).toEqual('nilainya');
+      const optFetch = spyFetch.argumen(1);
+      expect(JSON.parse(optFetch.body)[namaField]).toEqual('nilainya');
     });
   };
 
   const itNgesubmitNilaiInputBaru = (namaField, nilaiInput) => {
     it('simpan nilai yang diinput baru ketika disubmit', async () => {
-      expect.hasAssertions();
+      const spyFetch = spy();
       render(
         <FormCustomer
           {...{ [namaField]: 'nilai existing' }}
-          onSubmit={
-            customer => expect(customer[namaField]).toEqual(nilaiInput)
-          }
+          fetch={spyFetch.fn}
         />
       );
 
-      await ReactTestUtils.Simulate.change(
+      ReactTestUtils.Simulate.change(
         field(namaField),
         { target: { value: nilaiInput, name: namaField } }
       );
-      await ReactTestUtils.Simulate.submit(form('customer'));
+      ReactTestUtils.Simulate.submit(form('customer'));
+
+      const optFetch = spyFetch.argumen(1);
+      expect(JSON.parse(optFetch.body)[namaField]).toEqual(nilaiInput);
     });
   };
 

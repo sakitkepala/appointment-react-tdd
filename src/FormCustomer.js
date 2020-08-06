@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 
-const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
+const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, fetch }) => {
   // Sintaks assignment ini `{ namaDepan }` ternyata
   // untuk bikin Objek yang punya properti `namaDepan`
   // dengan nilai key dari props di atas.
@@ -12,6 +12,15 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
       ...customer,
       [target.name]: target.value
     }));
+  };
+
+  const handleSubmit = () => {
+    fetch('/customer', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customer)
+    });
   };
 
   // Form di komponen ini pakai event handler yang memanggil function
@@ -36,7 +45,7 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
   // berupa function `onSubmit()` yang dioper dari komponen parent ke
   // sini (komponen FormCustomer).
   return (
-    <form id="customer" onSubmit={() => onSubmit(customer)}>
+    <form id="customer" onSubmit={handleSubmit}>
       <label htmlFor="namaDepan">Nama depan</label>
       <input id="namaDepan" type="text" name="namaDepan" value={namaDepan} onChange={handleChangeDiInput} />
 
@@ -49,6 +58,10 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSubmit }) => {
       <input type="submit" value="Simpan" />
     </form>
   );
+};
+
+FormCustomer.defaultProps = {
+  fetch: async () => {},
 };
 
 export { FormCustomer };
