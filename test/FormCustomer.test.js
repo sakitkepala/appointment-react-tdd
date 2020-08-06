@@ -4,6 +4,24 @@ import { createContainer } from './domManipulator';
 import { FormCustomer } from '../src/FormCustomer';
 
 
+const spy = () => {
+  let argumenDiterima;
+  return {
+    fn: (...args) => (argumenDiterima = args),
+    argumenDiterima: () => argumenDiterima,
+    argumen: n => argumenDiterima[n]
+  };
+};
+
+expect.extend({
+  toHaveBeenCalled(received) {
+    if (received.argumenDiterima() === undefined) {
+      return { pass: false, message: () => 'Spy tidak dipanggil.' };
+    }
+    return { pass: true, message: () => 'Spy dipanggil.' };
+  }
+});
+
 describe('FormCustomer', () => {
   let render, container;
 
@@ -68,12 +86,29 @@ describe('FormCustomer', () => {
     });
   };
 
+  const itNgesubmitNilaiExisting = namaField => {
+    it('simpan nilai yang existing ketika disubmit', async () => {
+      const spySubmit = spy();
+      render(
+        <FormCustomer
+          {...{ [namaField]: 'nilainya' }}
+          onSubmit={spySubmit.fn}
+        />
+      );
+
+      ReactTestUtils.Simulate.submit(form('customer'));
+
+      expect(spySubmit).toHaveBeenCalled();
+      expect(spySubmit.argumen(0)[namaField]).toEqual('nilainya');
+    });
+  };
+
   const itNgesubmitNilaiInputBaru = (namaField, nilaiInput) => {
     it('simpan nilai yang diinput baru ketika disubmit', async () => {
       expect.hasAssertions();
       render(
         <FormCustomer
-          {...{ [namaField]: 'nilaiExisting' }}
+          {...{ [namaField]: 'nilai existing' }}
           onSubmit={
             customer => expect(customer[namaField]).toEqual(nilaiInput)
           }
@@ -83,21 +118,6 @@ describe('FormCustomer', () => {
       await ReactTestUtils.Simulate.change(
         field(namaField),
         { target: { value: nilaiInput, name: namaField } }
-      );
-      await ReactTestUtils.Simulate.submit(form('customer'));
-    });
-  };
-
-  const itNgesubmitNilaiExisting = (namaField, nilaiExisting) => {
-    it('simpan nilai yang existing ketika disubmit', async () => {
-      expect.hasAssertions();
-      render(
-        <FormCustomer
-          {...{ [namaField]: nilaiExisting }}
-          onSubmit={
-            customer => expect(customer[namaField]).toEqual(nilaiExisting)
-          }
-        />
       );
       await ReactTestUtils.Simulate.submit(form('customer'));
     });
@@ -113,7 +133,7 @@ describe('FormCustomer', () => {
 
     itAssignIdSesuaiIdLabel('namaDepan');
 
-    itNgesubmitNilaiExisting('namaDepan', 'Mary');
+    itNgesubmitNilaiExisting('namaDepan');
 
     itNgesubmitNilaiInputBaru('namaDepan', 'Belu');
   });
@@ -128,7 +148,7 @@ describe('FormCustomer', () => {
 
     itAssignIdSesuaiIdLabel('namaBelakang');
 
-    itNgesubmitNilaiExisting('namaBelakang', 'Jane');
+    itNgesubmitNilaiExisting('namaBelakang');
 
     itNgesubmitNilaiInputBaru('namaBelakang', 'Kesayangan');
   });
@@ -143,7 +163,7 @@ describe('FormCustomer', () => {
 
     itAssignIdSesuaiIdLabel('nomorTelepon');
 
-    itNgesubmitNilaiExisting('nomorTelepon', '123456');
+    itNgesubmitNilaiExisting('nomorTelepon');
 
     itNgesubmitNilaiInputBaru('nomorTelepon', '654321');
   });
