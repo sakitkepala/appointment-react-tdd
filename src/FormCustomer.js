@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 
-const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, fetch }) => {
+const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon }) => {
   // Sintaks assignment ini `{ namaDepan }` ternyata
   // untuk bikin Objek yang punya properti `namaDepan`
   // dengan nilai key dari props di atas.
@@ -15,7 +15,7 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, fetch }) => {
   };
 
   const handleSubmit = () => {
-    fetch('/customer', {
+    window.fetch('/customer', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
@@ -58,10 +58,6 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, fetch }) => {
       <input type="submit" value="Simpan" />
     </form>
   );
-};
-
-FormCustomer.defaultProps = {
-  fetch: async () => {},
 };
 
 export { FormCustomer };

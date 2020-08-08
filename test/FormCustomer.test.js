@@ -24,9 +24,17 @@ expect.extend({
 
 describe('FormCustomer', () => {
   let render, container;
+  const fetchAsli = window.fetch;
+  let spyFetch;
 
   beforeEach(() => {
     ({ render, container } = createContainer());
+    spyFetch = spy();
+    window.fetch = spyFetch.fn;
+  });
+
+  afterEach(() => {
+    window.fetch = fetchAsli;
   });
 
   const form = id => container.querySelector(`form[id="${id}"]`);
@@ -48,8 +56,7 @@ describe('FormCustomer', () => {
   });
 
   it('panggil fetch pakai properti yang benar ketika submit data', () => {
-    const spyFetch = spy();
-    render(<FormCustomer fetch={spyFetch.fn} />);
+    render(<FormCustomer />);
 
     ReactTestUtils.Simulate.submit(form('customer'));
 
@@ -105,12 +112,9 @@ describe('FormCustomer', () => {
 
   const itNgesubmitNilaiExisting = namaField => {
     it('simpan nilai yang existing ketika disubmit', async () => {
-      const spyFetch = spy();
       render(
         <FormCustomer
-          {...{ [namaField]: 'nilainya' }}
-          fetch={spyFetch.fn}
-        />
+          {...{ [namaField]: 'nilainya' }} />
       );
 
       ReactTestUtils.Simulate.submit(form('customer'));
@@ -122,12 +126,9 @@ describe('FormCustomer', () => {
 
   const itNgesubmitNilaiInputBaru = (namaField, nilaiInput) => {
     it('simpan nilai yang diinput baru ketika disubmit', async () => {
-      const spyFetch = spy();
       render(
         <FormCustomer
-          {...{ [namaField]: 'nilai existing' }}
-          fetch={spyFetch.fn}
-        />
+          {...{ [namaField]: 'nilai existing' }} />
       );
 
       ReactTestUtils.Simulate.change(
