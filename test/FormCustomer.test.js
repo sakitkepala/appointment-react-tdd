@@ -2,17 +2,17 @@ import React from 'react';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
 
 import 'whatwg-fetch';
-import { createContainer } from './domManipulator';
+import { createContainer, denganEvent } from './domManipulator';
 import { responFetchOk, responFetchError, bodyRequestnya } from './helperSpy';
 
 import { FormCustomer } from '../src/FormCustomer';
 
 
 describe('FormCustomer', () => {
-  let render, container, element, form, field, labelFor;
+  let render, container, element, form, field, labelFor, change, submit;
 
   beforeEach(() => {
-    ({ render, container, element, form, field, labelFor } = createContainer());
+    ({ render, container, element, form, field, labelFor, change, submit } = createContainer());
     jest.spyOn(window, 'fetch').mockReturnValue(responFetchOk({}));
   });
 
@@ -30,14 +30,13 @@ describe('FormCustomer', () => {
     render(<FormCustomer />);
 
     const tombolSubmit = element('input[type="submit"]');
-
     expect(tombolSubmit).not.toBeNull();
   });
 
-  it('panggil fetch pakai properti yang benar ketika submit data', () => {
+  it('panggil fetch pakai properti yang benar ketika submit data', async () => {
     render(<FormCustomer />);
 
-    ReactTestUtils.Simulate.submit(form('customer'));
+    await submit(form('customer'));
 
     expect(window.fetch).toHaveBeenCalledWith(
       '/customer',
@@ -53,11 +52,9 @@ describe('FormCustomer', () => {
     const customer = { id: 123 };
     window.fetch.mockReturnValue(responFetchOk(customer));
     const spySave = jest.fn();
-
     render(<FormCustomer onSave={spySave} />);
-    await act(async () => {
-      ReactTestUtils.Simulate.submit(form('customer'));
-    });
+
+    await submit(form('customer'));
 
     expect(spySave).toHaveBeenCalledWith(customer);
   });
@@ -65,11 +62,9 @@ describe('FormCustomer', () => {
   it('gak kasih notif berupa onSave kalau request POST ngereturn error', async () => {
     window.fetch.mockReturnValue(responFetchError());
     const spySave = jest.fn();
-
     render(<FormCustomer onSave={spySave} />);
-    await act(async () => {
-      ReactTestUtils.Simulate.submit(form('customer'));
-    });
+
+    await submit(form('customer'));
 
     expect(spySave).not.toHaveBeenCalled();
   });
@@ -77,10 +72,9 @@ describe('FormCustomer', () => {
   it('cegah action default waktu submit form', async () => {
     const spyPreventDefault = jest.fn();
     render(<FormCustomer />);
-    await act(async () => {
-      ReactTestUtils.Simulate.submit(form('customer'), {
-        preventDefault: spyPreventDefault
-      });
+
+    await submit(form('customer'), {
+      preventDefault: spyPreventDefault
     });
 
     expect(spyPreventDefault).toHaveBeenCalled();
@@ -88,11 +82,9 @@ describe('FormCustomer', () => {
 
   it('tampilkan pesan error waktu pemanggilan fetch-nya gagal', async () => {
     window.fetch.mockReturnValue(Promise.resolve({ ok: false }));
-
     render(<FormCustomer />);
-    await act(async () => {
-      ReactTestUtils.Simulate.submit(form('customer'));
-    });
+
+    await submit(form('customer'));
 
     expect(element('.error')).not.toBeNull();
     expect(element('.error').textContent).toMatch('Terjadi error');
@@ -144,7 +136,7 @@ describe('FormCustomer', () => {
           {...{ [namaField]: 'nilainya' }} />
       );
 
-      ReactTestUtils.Simulate.submit(form('customer'));
+      await submit(form('customer'));
 
       expect(bodyRequestnya(window.fetch)).toMatchObject({
         [namaField]: 'nilainya'
@@ -159,11 +151,11 @@ describe('FormCustomer', () => {
           {...{ [namaField]: 'nilai existing' }} />
       );
 
-      ReactTestUtils.Simulate.change(
+      change(
         field('customer', namaField),
-        { target: { value: nilaiInput, name: namaField } }
+        denganEvent(namaField, nilaiInput)
       );
-      ReactTestUtils.Simulate.submit(form('customer'));
+      await submit(form('customer'));
 
       expect(bodyRequestnya(window.fetch)).toMatchObject({
         [namaField]: nilaiInput
