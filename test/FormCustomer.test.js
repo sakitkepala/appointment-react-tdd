@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
 
+import 'whatwg-fetch';
 import { createContainer } from './domManipulator';
 import { responFetchOk, responFetchError, bodyRequestnya } from './helperSpy';
 
@@ -9,17 +10,14 @@ import { FormCustomer } from '../src/FormCustomer';
 
 describe('FormCustomer', () => {
   let render, container;
-  const fetchAsli = window.fetch;
-  let spyFetch;
 
   beforeEach(() => {
     ({ render, container } = createContainer());
-    spyFetch = jest.fn(() => responFetchOk({}));
-    window.fetch = spyFetch;
+    jest.spyOn(window, 'fetch').mockReturnValue(responFetchOk({}));
   });
 
   afterEach(() => {
-    window.fetch = fetchAsli;
+    window.fetch.mockRestore();
   });
 
   const form = id => container.querySelector(`form[id="${id}"]`);
@@ -45,7 +43,7 @@ describe('FormCustomer', () => {
 
     ReactTestUtils.Simulate.submit(form('customer'));
 
-    expect(spyFetch).toHaveBeenCalledWith(
+    expect(window.fetch).toHaveBeenCalledWith(
       '/customer',
       expect.objectContaining({
         method: 'POST',
@@ -57,7 +55,7 @@ describe('FormCustomer', () => {
 
   it('kasih notif berupa onSave waktu form disubmit', async () => {
     const customer = { id: 123 };
-    spyFetch.mockReturnValue(responFetchOk(customer));
+    window.fetch.mockReturnValue(responFetchOk(customer));
     const spySave = jest.fn();
 
     render(<FormCustomer onSave={spySave} />);
@@ -69,7 +67,7 @@ describe('FormCustomer', () => {
   });
 
   it('gak kasih notif berupa onSave kalau request POST ngereturn error', async () => {
-    spyFetch.mockReturnValue(responFetchError());
+    window.fetch.mockReturnValue(responFetchError());
     const spySave = jest.fn();
 
     render(<FormCustomer onSave={spySave} />);
@@ -93,7 +91,7 @@ describe('FormCustomer', () => {
   });
 
   it('tampilkan pesan error waktu pemanggilan fetch-nya gagal', async () => {
-    spyFetch.mockReturnValue(Promise.resolve({ ok: false }));
+    window.fetch.mockReturnValue(Promise.resolve({ ok: false }));
 
     render(<FormCustomer />);
     await act(async () => {
@@ -153,7 +151,7 @@ describe('FormCustomer', () => {
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(bodyRequestnya(spyFetch)).toMatchObject({
+      expect(bodyRequestnya(window.fetch)).toMatchObject({
         [namaField]: 'nilainya'
       });
     });
@@ -172,7 +170,7 @@ describe('FormCustomer', () => {
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(bodyRequestnya(spyFetch)).toMatchObject({
+      expect(bodyRequestnya(window.fetch)).toMatchObject({
         [namaField]: nilaiInput
       });
     });
