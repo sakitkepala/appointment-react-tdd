@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 
 
-const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon }) => {
+const Error = () => (<div className="error">Terjadi error selagi save</div>);
+
+const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSave }) => {
   // Sintaks assignment ini `{ namaDepan }` ternyata
   // untuk bikin Objek yang punya properti `namaDepan`
   // dengan nilai key dari props di atas.
   const [ customer, setCustomer ] = useState({ namaDepan, namaBelakang, nomorTelepon });
+  const [ error, setError ] = useState(false);
 
   const handleChangeDiInput = ({ target }) => {
     setCustomer(customer => ({
@@ -14,13 +17,23 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    window.fetch('/customer', {
+  const handleSubmit = async evt => {
+    evt.preventDefault();
+
+    const res = await window.fetch('/customer', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(customer)
     });
+
+    if (res.ok) {
+      const customerDenganId = await res.json();
+      onSave(customerDenganId);
+    }
+    else {
+      setError(true);
+    }
   };
 
   // Form di komponen ini pakai event handler yang memanggil function
@@ -46,6 +59,8 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon }) => {
   // sini (komponen FormCustomer).
   return (
     <form id="customer" onSubmit={handleSubmit}>
+      { error ? <Error /> : null }
+
       <label htmlFor="namaDepan">Nama depan</label>
       <input id="namaDepan" type="text" name="namaDepan" value={namaDepan} onChange={handleChangeDiInput} />
 
@@ -58,6 +73,10 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon }) => {
       <input type="submit" value="Simpan" />
     </form>
   );
+};
+
+FormCustomer.defaultProps = {
+  onSave: () => {}
 };
 
 export { FormCustomer };

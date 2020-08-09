@@ -1,17 +1,31 @@
 import React from 'react';
-import ReactTestUtils from 'react-dom/test-utils';
+import ReactTestUtils, { act } from 'react-dom/test-utils';
 import { createContainer } from './domManipulator';
 import { FormCustomer } from '../src/FormCustomer';
 
 
 const spy = () => {
   let argumenDiterima;
+  let nilaiReturn;
+
   return {
-    fn: (...args) => (argumenDiterima = args),
+    fn: (...args) => {
+      argumenDiterima = args;
+      return nilaiReturn
+    },
     argumenDiterima: () => argumenDiterima,
-    argumen: n => argumenDiterima[n]
+    argumenByIndex: n => argumenDiterima[n],
+    setNilaiReturnStub: nilai => nilaiReturn = nilai
   };
 };
+
+const responFetchOk = body =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(body)
+  });
+
+const responFetchError = () => Promise.resolve({ ok: false });
 
 expect.extend({
   toHaveBeenCalled(received) {
@@ -31,6 +45,7 @@ describe('FormCustomer', () => {
     ({ render, container } = createContainer());
     spyFetch = spy();
     window.fetch = spyFetch.fn;
+    spyFetch.setNilaiReturnStub(responFetchOk({}));
   });
 
   afterEach(() => {
@@ -61,14 +76,65 @@ describe('FormCustomer', () => {
     ReactTestUtils.Simulate.submit(form('customer'));
 
     expect(spyFetch).toHaveBeenCalled();
-    expect(spyFetch.argumen(0)).toEqual('/customer');
+    expect(spyFetch.argumenByIndex(0)).toEqual('/customer');
 
-    const optFetch = spyFetch.argumen(1);
+    const optFetch = spyFetch.argumenByIndex(1);
     expect(optFetch.method).toEqual('POST');
     expect(optFetch.credentials).toEqual('same-origin');
     expect(optFetch.headers).toEqual({
       'Content-Type': 'application/json'
     });
+  });
+
+  it('kasih notif berupa onSave waktu form disubmit', async () => {
+    const customer = { id: 123 };
+    spyFetch.setNilaiReturnStub(responFetchOk(customer));
+    const spySave = spy();
+
+    render(<FormCustomer onSave={spySave.fn} />);
+    await act(async () => {
+      ReactTestUtils.Simulate.submit(form('customer'));
+    });
+
+    expect(spySave).toHaveBeenCalled();
+    expect(spySave.argumenByIndex(0)).toEqual(customer);
+  });
+
+  it('gak kasih notif berupa onSave kalau request POST ngereturn error', async () => {
+    spyFetch.setNilaiReturnStub(responFetchError());
+    const spySave = spy();
+
+    render(<FormCustomer onSave={spySave.fn} />);
+    await act(async () => {
+      ReactTestUtils.Simulate.submit(form('customer'));
+    });
+
+    expect(spySave).not.toHaveBeenCalled();
+  });
+
+  it('cegah action default waktu submit form', async () => {
+    const spyPreventDefault = spy();
+    render(<FormCustomer />);
+    await act(async () => {
+      ReactTestUtils.Simulate.submit(form('customer'), {
+        preventDefault: spyPreventDefault.fn
+      });
+    });
+
+    expect(spyPreventDefault).toHaveBeenCalled();
+  });
+
+  it('tampilkan pesan error waktu pemanggilan fetch-nya gagal', async () => {
+    spyFetch.setNilaiReturnStub(Promise.resolve({ ok: false }));
+
+    render(<FormCustomer />);
+    await act(async () => {
+      ReactTestUtils.Simulate.submit(form('customer'));
+    });
+
+    const elementError = container.querySelector('.error');
+    expect(elementError).not.toBeNull();
+    expect(elementError.textContent).toMatch('Terjadi error');
   });
 
   const expectFieldInputTipenyaText = elemenForm => {
@@ -119,7 +185,7 @@ describe('FormCustomer', () => {
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      const optFetch = spyFetch.argumen(1);
+      const optFetch = spyFetch.argumenByIndex(1);
       expect(JSON.parse(optFetch.body)[namaField]).toEqual('nilainya');
     });
   };
@@ -137,7 +203,7 @@ describe('FormCustomer', () => {
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      const optFetch = spyFetch.argumen(1);
+      const optFetch = spyFetch.argumenByIndex(1);
       expect(JSON.parse(optFetch.body)[namaField]).toEqual(nilaiInput);
     });
   };
