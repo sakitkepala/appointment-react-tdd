@@ -9,20 +9,16 @@ import { FormCustomer } from '../src/FormCustomer';
 
 
 describe('FormCustomer', () => {
-  let render, container;
+  let render, container, element, form, field, labelFor;
 
   beforeEach(() => {
-    ({ render, container } = createContainer());
+    ({ render, container, element, form, field, labelFor } = createContainer());
     jest.spyOn(window, 'fetch').mockReturnValue(responFetchOk({}));
   });
 
   afterEach(() => {
     window.fetch.mockRestore();
   });
-
-  const form = id => container.querySelector(`form[id="${id}"]`);
-  const field = name => form('customer').elements[name];
-  const labelFor = elemenForm => container.querySelector(`label[for="${elemenForm}"]`);
 
   it('nge-render form', () => {
     render(<FormCustomer />);
@@ -33,7 +29,7 @@ describe('FormCustomer', () => {
   it('punya tombol submit', () => {
     render(<FormCustomer />);
 
-    const tombolSubmit = form('customer').querySelector('input[type="submit"]');
+    const tombolSubmit = element('input[type="submit"]');
 
     expect(tombolSubmit).not.toBeNull();
   });
@@ -98,9 +94,8 @@ describe('FormCustomer', () => {
       ReactTestUtils.Simulate.submit(form('customer'));
     });
 
-    const elementError = container.querySelector('.error');
-    expect(elementError).not.toBeNull();
-    expect(elementError.textContent).toMatch('Terjadi error');
+    expect(element('.error')).not.toBeNull();
+    expect(element('.error').textContent).toMatch('Terjadi error');
   });
 
   const expectFieldInputTipenyaText = elemenForm => {
@@ -114,7 +109,7 @@ describe('FormCustomer', () => {
     it('di-render sebagai box input teks', () => {
       render(<FormCustomer />);
 
-      expectFieldInputTipenyaText(field(namaField));
+      expectFieldInputTipenyaText(field('customer', namaField));
     });
   };
 
@@ -122,7 +117,7 @@ describe('FormCustomer', () => {
     it('menyertakan nilai yang existing', () => {
       render(<FormCustomer {...{[namaField]: 'nilai' }} />);
 
-      expect(field(namaField).value).toEqual('nilai');
+      expect(field('customer', namaField).value).toEqual('nilai');
     });
   };
 
@@ -138,7 +133,7 @@ describe('FormCustomer', () => {
     it('nge-assign id yang sesuai id label-nya', () => {
       render(<FormCustomer />);
   
-      expect(field(namaField).id).toEqual(namaField);
+      expect(field('customer', namaField).id).toEqual(namaField);
     });
   };
 
@@ -165,7 +160,7 @@ describe('FormCustomer', () => {
       );
 
       ReactTestUtils.Simulate.change(
-        field(namaField),
+        field('customer', namaField),
         { target: { value: nilaiInput, name: namaField } }
       );
       ReactTestUtils.Simulate.submit(form('customer'));
