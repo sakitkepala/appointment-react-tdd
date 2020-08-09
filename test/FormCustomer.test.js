@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
+
 import { createContainer } from './domManipulator';
+import { responFetchOk, responFetchError, bodyRequestnya } from './helperSpy';
+
 import { FormCustomer } from '../src/FormCustomer';
 
 
@@ -18,16 +21,6 @@ describe('FormCustomer', () => {
   afterEach(() => {
     window.fetch = fetchAsli;
   });
-
-  const responFetchOk = body =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(body)
-    });
-
-  const responFetchError = () => Promise.resolve({ ok: false });
-
-  const bodyRequestFetch = () => JSON.parse(spyFetch.mock.calls[0][1].body);
 
   const form = id => container.querySelector(`form[id="${id}"]`);
   const field = name => form('customer').elements[name];
@@ -160,7 +153,7 @@ describe('FormCustomer', () => {
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(bodyRequestFetch()).toMatchObject({
+      expect(bodyRequestnya(spyFetch)).toMatchObject({
         [namaField]: 'nilainya'
       });
     });
@@ -179,7 +172,7 @@ describe('FormCustomer', () => {
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(bodyRequestFetch()).toMatchObject({
+      expect(bodyRequestnya(spyFetch)).toMatchObject({
         [namaField]: nilaiInput
       });
     });
