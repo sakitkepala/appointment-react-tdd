@@ -4,38 +4,6 @@ import { createContainer } from './domManipulator';
 import { FormCustomer } from '../src/FormCustomer';
 
 
-const spy = () => {
-  let argumenDiterima;
-  let nilaiReturn;
-
-  return {
-    fn: (...args) => {
-      argumenDiterima = args;
-      return nilaiReturn
-    },
-    argumenDiterima: () => argumenDiterima,
-    argumenByIndex: n => argumenDiterima[n],
-    setNilaiReturnStub: nilai => nilaiReturn = nilai
-  };
-};
-
-const responFetchOk = body =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve(body)
-  });
-
-const responFetchError = () => Promise.resolve({ ok: false });
-
-expect.extend({
-  toHaveBeenCalled(received) {
-    if (received.argumenDiterima() === undefined) {
-      return { pass: false, message: () => 'Spy tidak dipanggil.' };
-    }
-    return { pass: true, message: () => 'Spy dipanggil.' };
-  }
-});
-
 describe('FormCustomer', () => {
   let render, container;
   const fetchAsli = window.fetch;
@@ -43,14 +11,23 @@ describe('FormCustomer', () => {
 
   beforeEach(() => {
     ({ render, container } = createContainer());
-    spyFetch = spy();
-    window.fetch = spyFetch.fn;
-    spyFetch.setNilaiReturnStub(responFetchOk({}));
+    spyFetch = jest.fn(() => responFetchOk({}));
+    window.fetch = spyFetch;
   });
 
   afterEach(() => {
     window.fetch = fetchAsli;
   });
+
+  const responFetchOk = body =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(body)
+    });
+
+  const responFetchError = () => Promise.resolve({ ok: false });
+
+  const bodyRequestFetch = () => JSON.parse(spyFetch.mock.calls[0][1].body);
 
   const form = id => container.querySelector(`form[id="${id}"]`);
   const field = name => form('customer').elements[name];
@@ -75,36 +52,34 @@ describe('FormCustomer', () => {
 
     ReactTestUtils.Simulate.submit(form('customer'));
 
-    expect(spyFetch).toHaveBeenCalled();
-    expect(spyFetch.argumenByIndex(0)).toEqual('/customer');
-
-    const optFetch = spyFetch.argumenByIndex(1);
-    expect(optFetch.method).toEqual('POST');
-    expect(optFetch.credentials).toEqual('same-origin');
-    expect(optFetch.headers).toEqual({
-      'Content-Type': 'application/json'
-    });
+    expect(spyFetch).toHaveBeenCalledWith(
+      '/customer',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json'}
+      })
+    );
   });
 
   it('kasih notif berupa onSave waktu form disubmit', async () => {
     const customer = { id: 123 };
-    spyFetch.setNilaiReturnStub(responFetchOk(customer));
-    const spySave = spy();
+    spyFetch.mockReturnValue(responFetchOk(customer));
+    const spySave = jest.fn();
 
-    render(<FormCustomer onSave={spySave.fn} />);
+    render(<FormCustomer onSave={spySave} />);
     await act(async () => {
       ReactTestUtils.Simulate.submit(form('customer'));
     });
 
-    expect(spySave).toHaveBeenCalled();
-    expect(spySave.argumenByIndex(0)).toEqual(customer);
+    expect(spySave).toHaveBeenCalledWith(customer);
   });
 
   it('gak kasih notif berupa onSave kalau request POST ngereturn error', async () => {
-    spyFetch.setNilaiReturnStub(responFetchError());
-    const spySave = spy();
+    spyFetch.mockReturnValue(responFetchError());
+    const spySave = jest.fn();
 
-    render(<FormCustomer onSave={spySave.fn} />);
+    render(<FormCustomer onSave={spySave} />);
     await act(async () => {
       ReactTestUtils.Simulate.submit(form('customer'));
     });
@@ -113,11 +88,11 @@ describe('FormCustomer', () => {
   });
 
   it('cegah action default waktu submit form', async () => {
-    const spyPreventDefault = spy();
+    const spyPreventDefault = jest.fn();
     render(<FormCustomer />);
     await act(async () => {
       ReactTestUtils.Simulate.submit(form('customer'), {
-        preventDefault: spyPreventDefault.fn
+        preventDefault: spyPreventDefault
       });
     });
 
@@ -125,7 +100,7 @@ describe('FormCustomer', () => {
   });
 
   it('tampilkan pesan error waktu pemanggilan fetch-nya gagal', async () => {
-    spyFetch.setNilaiReturnStub(Promise.resolve({ ok: false }));
+    spyFetch.mockReturnValue(Promise.resolve({ ok: false }));
 
     render(<FormCustomer />);
     await act(async () => {
@@ -185,8 +160,9 @@ describe('FormCustomer', () => {
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      const optFetch = spyFetch.argumenByIndex(1);
-      expect(JSON.parse(optFetch.body)[namaField]).toEqual('nilainya');
+      expect(bodyRequestFetch()).toMatchObject({
+        [namaField]: 'nilainya'
+      });
     });
   };
 
@@ -203,8 +179,9 @@ describe('FormCustomer', () => {
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      const optFetch = spyFetch.argumenByIndex(1);
-      expect(JSON.parse(optFetch.body)[namaField]).toEqual(nilaiInput);
+      expect(bodyRequestFetch()).toMatchObject({
+        [namaField]: nilaiInput
+      });
     });
   };
 
