@@ -90,6 +90,17 @@ describe('FormCustomer', () => {
     expect(element('.error').textContent).toMatch('Terjadi error');
   });
 
+  it('hilangkan pesan error waktu disubmit lagi', async () => {
+    window.fetch.mockReturnValueOnce(responFetchError());
+    window.fetch.mockReturnValue(responFetchOk());
+    render(<FormCustomer />);
+
+    await submit(form('customer'));
+    await submit(form('customer'));
+
+    expect(element('.error')).toBeNull();
+  });
+
   const expectFieldInputTipenyaText = elemenForm => {
     // expect(elemenForm).not.toBe(undefined);
     expect(elemenForm).not.toBeNull();

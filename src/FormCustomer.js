@@ -28,6 +28,7 @@ const FormCustomer = ({ namaDepan, namaBelakang, nomorTelepon, onSave }) => {
     });
 
     if (res.ok) {
+      setError(false);
       const customerDenganId = await res.json();
       onSave(customerDenganId);
     }
