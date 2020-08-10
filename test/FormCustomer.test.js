@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactTestUtils, { act } from 'react-dom/test-utils';
 
 import 'whatwg-fetch';
 import { createContainer, denganEvent } from './domManipulator';

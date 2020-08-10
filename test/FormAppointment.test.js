@@ -1,19 +1,18 @@
 import React from 'react';
-import ReactTestUtils from 'react-dom/test-utils';
-import { createContainer } from './domManipulator';
+
+import { createContainer, denganEvent } from './domManipulator';
+
 import { FormAppointment } from '../src/FormAppointment';
 
 
 describe('FormAppointment', () => {
-  let render, container;
+  let render, container, element, elementSemua, form, field, labelFor, change, submit;
 
   beforeEach(() => {
-    ({ render, container } = createContainer());
+    ({ render, container, element, elementSemua, form, field, labelFor, change, submit } = createContainer());
   });
 
-  const form = id => container.querySelector(`form[id="${id}"]`);
-  const field = namaField => form('appointment').elements[namaField];
-  const labelFor = forElemen => container.querySelector(`label[for="${forElemen}"]`);
+  // TODO: ekstrak ke `domManipulator`?
   const cariOption = (nodeDropdown, textContent) => {
     const options = Array.from(nodeDropdown.childNodes);
     return options.find(
@@ -30,8 +29,7 @@ describe('FormAppointment', () => {
   it('ada tombol submitnya', () => {
     render(<FormAppointment />);
 
-    const tombolSubmit = container.querySelector('input[type="submit"]');
-
+    const tombolSubmit = element('input[type="submit"]');
     expect(tombolSubmit).not.toBeNull();
   });
 
@@ -39,8 +37,8 @@ describe('FormAppointment', () => {
     it('dirender jadi kotak select', () => {
       render(<FormAppointment />);
 
-      expect(field(namaField)).not.toBeNull();
-      expect(field(namaField).tagName).toEqual('SELECT');
+      expect(field('appointment', namaField)).not.toBeNull();
+      expect(field('appointment', namaField).tagName).toEqual('SELECT');
     });
   };
 
@@ -48,8 +46,7 @@ describe('FormAppointment', () => {
     it('awalnya yang terpilih nilai kosong', () => {
       render(<FormAppointment />);
 
-      const nodePertama = field(namaField).childNodes[0];
-
+      const nodePertama = field('appointment', namaField).childNodes[0];
       expect(nodePertama.value).toEqual('');
       expect(nodePertama.selected).toBeTruthy();
     });
@@ -67,7 +64,7 @@ describe('FormAppointment', () => {
     it('kasih id yang sesuai id labelnya', () => {
       render(<FormAppointment />);
 
-      expect(field(namaField).id).toEqual(namaField);
+      expect(field('appointment', namaField).id).toEqual(namaField);
     });
   };
 
@@ -79,8 +76,7 @@ describe('FormAppointment', () => {
           {...{ [namaField]: nilaiExisting }} />
       );
 
-      const option = cariOption(field(namaField), nilaiExisting);
-
+      const option = cariOption(field('appointment', namaField), nilaiExisting);
       expect(option.selected).toBeTruthy();
     });
   };
@@ -97,7 +93,8 @@ describe('FormAppointment', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+
+      await submit(form('appointment'));
     });
   };
 
@@ -113,10 +110,9 @@ describe('FormAppointment', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.change(field(namaField), {
-        target: { value: 'nilai baru', name: namaField }
-      });
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+
+      await change(field('appointment', namaField), denganEvent(namaField, 'nilai baru'));
+      await submit(form('appointment'));
     });
   };
 
@@ -148,13 +144,13 @@ describe('FormAppointment', () => {
       const layananTersedia = ['Cukur', 'Sisir bulu'];
 
       render(<FormAppointment layananTersedia={layananTersedia} />);
+
       const nodeOption = Array.from(
-        field('layanan').childNodes
+        field('appointment', 'layanan').childNodes
       );
       const layananYangDirender = nodeOption.map(
         node => node.textContent
       );
-
       expect(layananYangDirender).toEqual(
         expect.arrayContaining(layananTersedia)
       );
@@ -195,11 +191,9 @@ describe('FormAppointment', () => {
           stylistMenurutLayanan={stylistMenurutLayanan} />
       );
 
-      ReactTestUtils.Simulate.change(field('layanan'), {
-        target: { value: '1', name: 'layanan' }
-      });
+      change(field('appointment', 'layanan'), denganEvent('layanan', '1'));
 
-      const opsiNode = Array.from(field('stylist').childNodes);
+      const opsiNode = Array.from(field('appointment', 'stylist').childNodes);
       const stylistDirender = opsiNode.map(n => n.textContent);
       expect(stylistDirender).toEqual(
         expect.arrayContaining(['Stylist A', 'Stylist B'])
@@ -209,9 +203,8 @@ describe('FormAppointment', () => {
 
   describe('tabel time-slot', () => {
 
-    const tabelTimeSlot = () => container.querySelector('table#time-slot');
-
-    const fieldMulaiPada = indeks => container.querySelectorAll('input[name="mulaiPada"]')[indeks];
+    const tabelTimeSlot = () => element('table#time-slot');
+    const fieldMulaiPada = indeks => elementSemua('input[name="mulaiPada"]')[indeks];
 
     it('nge-render tabel untuk time-slot', () => {
       render(<FormAppointment />);
@@ -223,7 +216,6 @@ describe('FormAppointment', () => {
       render(<FormAppointment bukaPada={9} tutupPada={11} />);
 
       const jumlahSlotTime = tabelTimeSlot().querySelectorAll('tbody >* th');
-
       expect(jumlahSlotTime).toHaveLength(4);
       expect(jumlahSlotTime[0].textContent).toEqual('09:00');
       expect(jumlahSlotTime[1].textContent).toEqual('09:30');
@@ -234,18 +226,17 @@ describe('FormAppointment', () => {
       render(<FormAppointment />);
 
       const barisHeader = tabelTimeSlot().querySelector('thead > tr');
-
       expect(barisHeader.firstChild.textContent).toEqual('');
     });
 
     it('nge-render tanggal-tanggal yang available dalam seminggu', () => {
       const hariIni = new Date(2020, 6, 22);
+
       render(<FormAppointment hariIni={hariIni} />);
 
       const tanggal = tabelTimeSlot().querySelectorAll(
         'thead >* th:not(:first-child)'
       );
-
       expect(tanggal).toHaveLength(7);
       expect(tanggal[0].textContent).toEqual('Wed 22');
       expect(tanggal[1].textContent).toEqual('Thu 23');
@@ -258,19 +249,18 @@ describe('FormAppointment', () => {
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
         { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
       ];
+
       render(<FormAppointment timeSlotTersedia={slotTersedia} hariIni={hariIni} />);
 
       const semuaCell = tabelTimeSlot().querySelectorAll('td');
-
       expect(semuaCell[0].querySelector('input[type="radio"]')).not.toBeNull();
       expect(semuaCell[7].querySelector('input[type="radio"]')).not.toBeNull();
     });
 
     it('tidak nge-render radio button untuk slot yang tidak available', () => {
       render(<FormAppointment timeSlotTersedia={[]} />);
-      
-      const jumlahSlotTime = tabelTimeSlot().querySelectorAll('input');
 
+      const jumlahSlotTime = tabelTimeSlot().querySelectorAll('input');
       expect(jumlahSlotTime).toHaveLength(0);
     });
 
@@ -280,6 +270,7 @@ describe('FormAppointment', () => {
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
         { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
       ];
+
       render(<FormAppointment timeSlotTersedia={slotTersedia} hariIni={hariIni} />);
 
       expect(fieldMulaiPada(0).value).toEqual(slotTersedia[0].mulaiPada.toString());
@@ -292,6 +283,7 @@ describe('FormAppointment', () => {
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
         { mulaiPada: hariIni.setHours(9, 30, 0, 0) }
       ];
+
       render(
         <FormAppointment
           timeSlotTersedia={slotTersedia}
@@ -319,7 +311,8 @@ describe('FormAppointment', () => {
             ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[0].mulaiPada)
           } />
       );
-      ReactTestUtils.Simulate.submit(form('appointment'));
+
+      submit(form('appointment'));
     });
 
     it('simpan nilai input baru radio button saat disumbit', () => {
@@ -338,13 +331,15 @@ describe('FormAppointment', () => {
             ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[1].mulaiPada)
           } />
       );
-      ReactTestUtils.Simulate.change(fieldMulaiPada(1), {
-        target: {
-          value: slotTersedia[1].mulaiPada.toString(),
-          name: 'mulaiPada'
-        }
-      });
-      ReactTestUtils.Simulate.submit(form('appointment'));
+      change(
+        fieldMulaiPada(1),
+        denganEvent(
+          'mulaiPada',
+          slotTersedia[1].mulaiPada.toString()
+        )
+      );
+
+      submit(form('appointment'));
     });
 
     it('filter appointment menurut stylist yang terpilih', () => {
@@ -359,16 +354,13 @@ describe('FormAppointment', () => {
           stylist: ['A']
         }
       ];
-      
       render(
         <FormAppointment
           timeSlotTersedia={timeSlotTersedia}
           hariIni={hariIni} />
       );
 
-      ReactTestUtils.Simulate.change(field('stylist'), {
-        target: { value: 'B', name: 'stylist' }
-      });
+      change(field('appointment', 'stylist'), denganEvent('stylist', 'B'));
 
       const cell = tabelTimeSlot().querySelectorAll('td');
       expect(
