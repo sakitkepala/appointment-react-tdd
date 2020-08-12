@@ -1,8 +1,10 @@
 import React from 'react';
 
+import 'whatwg-fetch';
 import { createContainer, denganEvent } from './domManipulator';
 
 import { FormAppointment } from '../src/FormAppointment';
+import { responFetchOk, bodyRequestnya } from './helperSpy';
 
 
 describe('FormAppointment', () => {
@@ -10,6 +12,11 @@ describe('FormAppointment', () => {
 
   beforeEach(() => {
     ({ render, container, element, elementSemua, form, field, labelFor, change, submit } = createContainer());
+    jest.spyOn(window, 'fetch').mockReturnValue(responFetchOk({}));
+  });
+
+  afterEach(() => {
+    window.fetch.mockRestore();
   });
 
   // TODO: ekstrak ke `domManipulator`?
@@ -31,6 +38,21 @@ describe('FormAppointment', () => {
 
     const tombolSubmit = element('input[type="submit"]');
     expect(tombolSubmit).not.toBeNull();
+  });
+
+  it('panggil fetch pakai properti/parameter yang benar waktu submit data', async () => {
+    render(<FormAppointment />);
+
+    await submit(form('appointment'));
+
+    expect(window.fetch).toHaveBeenCalledWith(
+      '/appointment',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json'}
+      })
+    );
   });
 
   const itDirenderJadiKotakSelect = namaField => {
@@ -83,36 +105,32 @@ describe('FormAppointment', () => {
 
   const itSubmitDenganNilaiExisting = (namaField, props) => {
     it('submit nilai select yang existing', async () => {
-      expect.hasAssertions();
       render(
         <FormAppointment
           {...props}
           {...{ [namaField]: 'nilainya' }}
-          handleSubmit={
-            props => expect(props[namaField]).toEqual('nilainya')
-          }
         />
       );
 
       await submit(form('appointment'));
+
+      expect(bodyRequestnya(window.fetch)[namaField]).toEqual('nilainya');
     });
   };
 
   const itSubmitNilaiSelectInputBaru = (namaField, props) => {
     it('submit nilai select yang input baru', async () => {
-      expect.hasAssertions();
       render(
         <FormAppointment
           {...props}
           {...{ [namaField]: 'nilai existing' }}
-          handleSubmit={
-            props => expect(props[namaField]).toEqual('nilai baru')
-          }
         />
       );
 
-      await change(field('appointment', namaField), denganEvent(namaField, 'nilai baru'));
+      change(field('appointment', namaField), denganEvent(namaField, 'nilai baru'));
       await submit(form('appointment'));
+
+      expect(bodyRequestnya(window.fetch)[namaField]).toEqual('nilai baru');
     });
   };
 
@@ -296,7 +314,6 @@ describe('FormAppointment', () => {
     });
 
     it('simpan nilai existing radio button-nya saat disubmit', () => {
-      expect.hasAssertions();
       const hariIni = new Date();
       const slotTersedia = [
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
@@ -307,16 +324,15 @@ describe('FormAppointment', () => {
           timeSlotTersedia={slotTersedia}
           hariIni={hariIni}
           mulaiPada={slotTersedia[0].mulaiPada}
-          handleSubmit={
-            ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[0].mulaiPada)
-          } />
+        />
       );
 
       submit(form('appointment'));
+
+      expect(bodyRequestnya(window.fetch).mulaiPada).toEqual(slotTersedia[0].mulaiPada);
     });
 
     it('simpan nilai input baru radio button saat disumbit', () => {
-      expect.hasAssertions();
       const hariIni = new Date();
       const slotTersedia = [
         { mulaiPada: hariIni.setHours(9, 0, 0, 0) },
@@ -327,10 +343,9 @@ describe('FormAppointment', () => {
           timeSlotTersedia={slotTersedia}
           hariIni={hariIni}
           mulaiPada={slotTersedia[0].mulaiPada}
-          handleSubmit={
-            ({ mulaiPada }) => expect(mulaiPada).toEqual(slotTersedia[1].mulaiPada)
-          } />
+        />
       );
+
       change(
         fieldMulaiPada(1),
         denganEvent(
@@ -338,8 +353,9 @@ describe('FormAppointment', () => {
           slotTersedia[1].mulaiPada.toString()
         )
       );
-
       submit(form('appointment'));
+
+      expect(bodyRequestnya(window.fetch).mulaiPada).toEqual(slotTersedia[1].mulaiPada);
     });
 
     it('filter appointment menurut stylist yang terpilih', () => {

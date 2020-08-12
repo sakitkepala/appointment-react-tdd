@@ -101,7 +101,6 @@ const FormAppointment = ({
   stylistTersedia,
   stylistMenurutLayanan,
   stylist,
-  handleSubmit,
   bukaPada,
   tutupPada,
   hariIni,
@@ -125,6 +124,18 @@ const FormAppointment = ({
       }));}
   ), []);
 
+  const handleSubmit = () => {
+    window.fetch(
+      '/appointment',
+      {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(appointment)
+      }
+    );
+  }
+
   let pilihanStylist = appointment.layanan
     ? stylistMenurutLayanan[appointment.layanan]
     : stylistTersedia;
@@ -136,7 +147,7 @@ const FormAppointment = ({
     : timeSlotTersedia;
 
   return (
-    <form id="appointment" onSubmit={() => handleSubmit(appointment)}>
+    <form id="appointment" onSubmit={handleSubmit}>
       <label htmlFor="layanan">Layanan</label>
       <select id="layanan" name="layanan" value={layanan} onChange={handleChangeInput}>
         <option />
